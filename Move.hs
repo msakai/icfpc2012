@@ -1,5 +1,8 @@
 module Move where
 
+import Control.Monad
+import Data.Array
+
 import Map
 
 data Move
@@ -24,7 +27,7 @@ move move (m,(x,y)) =
     f (x',y') = 
       case m ! (x',y') of
         Empty          -> Just (m', (x',y'))
-        Earch          -> Just (m', (x',y'))
+        Earth          -> Just (m', (x',y'))
         Lambda         -> Just (m', (x',y'))
         OpenLambdaLift -> Just (m', (x',y'))
         Rock
@@ -40,11 +43,11 @@ move move (m,(x,y)) =
       where
         m' = m // [((x,y),Empty), ((x',y'), Robot)]    
 
-isValidMove :: Map -> (Int,Int) -> (Int,Int) -> Bool
+isValidMove :: Map -> Pos -> Pos -> Bool
 isValidMove m (x,y) (x',y') =
   case m ! (x',y') of
     Empty          -> True
-    Earch          -> True
+    Earth          -> True
     Lambda         -> True
     OpenLambdaLift -> True
     Rock
