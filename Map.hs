@@ -3,7 +3,9 @@ module Map where
 import Control.Monad
 import Data.Array
 
-type Map = Array (Int,Int) Cell
+type Map = Array Pos Cell
+
+type Pos = (Int,Int)
 
 data Cell
   = Robot

@@ -14,7 +14,7 @@ data Move
   | A
   deriving (Ord, Eq, Show)
 
-move :: Move -> (Map, (Int,Int)) -> Maybe (Map, (Int,Int))
+move :: Move -> (Map, Pos) -> Maybe (Map, Pos)
 move move (m,(x,y)) =
   case move of
     L -> f (x-1, y)
