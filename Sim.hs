@@ -198,8 +198,8 @@ interactiveSim s0 = go (s0,Seq.empty) []
               putStrLn "empty undo buffer"
               go (s,trace) undoBuf
             (old:undoBuf') -> go old undoBuf'
-        _ | all (`elem` "LRUDWA") l -> do
-          let cs = parseCommands l
+        _ | all (`elem` "LRUDWA") (map toUpper l) -> do
+          let cs = parseCommands (map toUpper l)
           go (foldl' step s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
           putStrLn "parse error"
