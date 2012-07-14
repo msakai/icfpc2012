@@ -52,6 +52,31 @@ flood2 = unlines
   , "Waterproof 3"
   ]
 
+case_example = do
+  gEnd s   @?= Just Winning
+  where
+    act = parseCommands "DDDLLLLLLURRRRRRRRRRRRDDDDDDDLLLLLLLLLLLDDDRRRRRRRRRRRD"
+    s0  = initialStateFromString example
+    s   = stepN s0 act
+
+example = unlines
+  [ "###############"
+  , "#***...R......#"
+  , "#***... ...*..#"
+  , "#\\\\\\... ..\\\\\\.#"
+  , "#...... ...*..#"
+  , "#..     .. ...#"
+  , "#.... .... ...#"
+  , "#.... .... ...#"
+  , "#.. .       ..#"
+  , "#..*. .. .....#"
+  , "#.... .. .....#"
+  , "#.\\.. .......*#"
+  , "#.............#"
+  , "#.........   .#"
+  , "#############L#"
+  ]
+
 ------------------------------------------------------------------------
 -- Test harness
 
