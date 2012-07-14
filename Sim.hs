@@ -104,11 +104,14 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     W -> s{ gScore = gScore s - 1, gSteps = gSteps s + 1 }
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
   where
-    f (x',y') = 
+    f xy@(x',y') = 
       case m ! (x',y') of
         Empty          -> s'
         Earth          -> s'
-        Lambda         -> s'{ gScore = gScore s' + 25, gLambda = gLambda s' + 1 }
+        Lambda         -> s'{ gScore = gScore s' + 25
+                            , gLambda = gLambda s' + 1 
+                            , gLambdaLeft = delete xy (gLambdaLeft s')
+                            }
         OpenLambdaLift -> s'{ gEnd = Just Winning, gScore = gScore s' + gLambda s' * 50 }
         Rock
           | x'==x+1 && y'==y &&
