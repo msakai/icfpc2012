@@ -37,11 +37,12 @@ import Metadata
 
 data GameState
   = GameState
-  { gPos    :: !Pos
-  , gMap    :: !Map
-  , gScore  :: !Int
-  , gLambda :: !Int
-  , gSteps  :: !Int
+  { gPos     :: !Pos      -- current position of the Robot
+  , gMap     :: !Map      -- current state of the mine
+  , gScore   :: !Int      -- score gained so far
+  , gLambda  :: !Int      -- number of gained Lambdas
+  , gLambdaLeft :: [Pos]  -- left Lambdas' positions
+  , gSteps  :: !Int       
   , gEnd    :: Maybe EndingCondition
 
   , gWater      :: !Int
@@ -58,9 +59,9 @@ initialState m (water,flooding,waterproof)
   , gMap    = m
   , gScore  = 0
   , gLambda = 0
+  , gLambdaLeft = map fst $ filter ((Lambda ==). snd) $ assocs m
   , gSteps  = 0
   , gEnd    = Nothing
-
   , gWater      = water
   , gFlooding   = flooding
   , gWaterproof = waterproof
