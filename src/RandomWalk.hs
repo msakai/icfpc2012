@@ -6,6 +6,7 @@ module RandomWalk
 import Control.Monad
 import Data.Array
 import Data.IORef
+import System.IO
 import qualified System.Random as Rand
 
 import Move
@@ -30,7 +31,10 @@ run bestRef s0 = forever $ walk s0 []
       (_, bestScore) <- readIORef bestRef
       let score = gScore s
       if score > bestScore
-        then writeIORef bestRef (cmds, score)
+        then do
+          hPutStrLn stderr $ "best score = " ++ show score
+          hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
+          writeIORef bestRef (cmds, score)
         else return ()
 
 randomCommand :: IO Command
