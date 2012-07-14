@@ -20,15 +20,12 @@ data Cell
   deriving (Ord, Eq, Show)
 
 update :: Map -> Maybe Map
-update m = Just (m // xs)
+update m = if crash m xs then Nothing
+           else Just (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
 
-    match = all (\(pos,cell) -> get pos == cell)
-
-    get p
-      | inRange (bounds m) p = m ! p
-      | otherwise = Wall
+    match = all (\(pos,cell) -> getCell m pos == cell)
 
     lambdaRemaining = Lambda `elem` elems m
 
@@ -49,6 +46,18 @@ update m = Just (m // xs)
         ClosedLambdaLift | not lambdaRemaining -> 
           [((x,y), OpenLambdaLift)]
         _ -> mzero
+
+getCell :: Map -> Pos -> Cell
+getCell m p
+  | inRange (bounds m) p = m ! p
+  | otherwise            = Wall
+
+crash :: Map -> [(Pos,Cell)] -> Bool
+crash _ [] = False
+crash m (((x,y),Rock) : cs)
+  | getCell m (x,y-1) == Robot = True
+  | otherwise                  = crash m cs
+crash m (_:cs) = crash m cs
 
 parseMap :: String -> Map
 parseMap = parseMap' . lines

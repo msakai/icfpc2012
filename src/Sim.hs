@@ -144,17 +144,9 @@ step s cmd
 
 updateMap :: GameState -> GameState -> GameState
 updateMap orig new = case m2 of
-  Nothing -> undefined
-  Just m' -> 
-    new{ gMap = m'
-       , gEnd =
-         -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
-           if gMap new ! (x,y+1) == Rock && gMap orig ! (x,y+1) /= Rock
-             then Just Losing
-             else gEnd new
-       } 
+  Nothing -> new { gEnd = Just Losing }
+  Just m' -> new { gMap = m' } 
   where
-    (x,y) = gPos new
     m2 = update (gMap new)
 
 -- XXX: underwater の判定タイミングとかよく分かっていない
@@ -209,6 +201,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
       hFlush stdout
       l <- liftM (filter (not . isSpace)) getLine
       case l of
+        ":q"    -> return ()
         ":quit" -> return ()
         ":dump" -> do
           putStrLn $ showCommands (F.toList trace)
