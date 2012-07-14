@@ -18,24 +18,24 @@ Source-Repository head
 
 Library
   Build-Depends:      base >=4 && <5, array, containers
-  Hs-Source-Dirs:     .
+  Hs-Source-Dirs:     src
   Exposed-Modules:    Map, Move, Sim
 
 Executable sim
   Main-is:            SimMain.hs
-  HS-Source-Dirs:     .
+  HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers
   Other-Modules:      Map, Move, Sim
 
 Executable lifter
   Main-is:            LifterMain.hs
-  HS-Source-Dirs:     .
+  HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers
   Other-Modules:      Map, Move, Sim
 
 Test-suite Test
   Type:              exitcode-stdio-1.0
-  HS-Source-Dirs:    .
+  HS-Source-Dirs:    src
   Main-is:           Test.hs
   Build-depends:     base >=4 && <5, array, containers, test-framework, test-framework-th, test-framework-hunit, HUnit
   Extensions: TemplateHaskell
