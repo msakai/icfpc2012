@@ -9,7 +9,9 @@ Description:    icfpc2012
 Stability:      experimental
 Build-Type:	Simple
 Extra-Source-Files:
-  README.md
+  README
+  PACKAGES
+  install
   samples/*.map
 
 Source-Repository head
