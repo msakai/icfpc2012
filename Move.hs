@@ -2,8 +2,10 @@ module Move where
 
 import Control.Monad
 import Data.Array
+import Data.Char
 import Data.List
 import Data.Maybe
+import System.IO
 import Text.Printf
 
 import Map
@@ -19,6 +21,9 @@ data Command
 
 parseCommands :: String -> [Command]
 parseCommands = map (read . return)
+
+showCommands :: [Command] -> String
+showCommands = concat . map show
 
 data GameState
   = GameState
@@ -100,28 +105,6 @@ isValidMove m (x,y) (x',y') =
           -- Additionally, the Rock moves to (x−2,y).
     _ -> False
 
--- contest1.map
--- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
-test_contest1 = printSim m act
-  where
-    m = parseMap'
-        [ "######"
-        , "#. *R#"
-        , "#  \\.#"
-        , "#\\ * #"
-        , "L  .\\#"
-        , "######"
-        ]
-    act = parseCommands "DLLLDDRRRLULLDL"
-
-printSim :: Map -> [Command] -> IO ()
-printSim m ms = do
-  forM_ (simulate (initialState m) ms) $ \s -> do
-    putStr $ showMap (gMap s)
-    printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
-    printf "End: %s\n" $ show (gEnd s)
-    putStrLn ""
-
 simulate :: GameState -> [Command] -> [GameState]
 simulate s [] = [s]
 simulate s (m:ms)
@@ -139,3 +122,71 @@ step s cmd
     s' = move cmd s
     s'' = s'{ gMap = update (gMap s') }
     (x,y) = gPos s''
+
+printSim :: Map -> [Command] -> IO ()
+printSim m ms = do
+  forM_ (simulate (initialState m) ms) $ \s -> do
+    printState s
+    putStrLn ""
+
+printState :: GameState -> IO ()
+printState s = do
+  putStr $ showMap (gMap s)
+  printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
+  printf "End: %s\n" $ show (gEnd s)
+
+interactiveSim :: Map -> IO ()
+interactiveSim m = go (initialState m) []
+  where
+    go s log = do
+      printState s
+      putStrLn ""
+      if isJust (gEnd s)
+        then do
+          putStrLn $ "log: " ++ showCommands (reverse log)
+          return ()
+        else prompt s log
+    prompt s log = do
+      putStr "> "
+      hFlush stdout
+      l <- liftM (filter (not . isSpace)) getLine
+      case l of
+        ":quit" -> return ()
+        ":command" -> do
+          putStrLn $ "command: " ++ showCommands (reverse log)
+          prompt s log
+        [c] | c `elem` "LRUDWA" -> do
+          let cmd = read [c]
+          go (step s cmd) (cmd : log)
+        _ -> do
+          putStrLn "parse error"
+          prompt s log
+
+contest1 =  parseMap'
+  [ "######"
+  , "#. *R#"
+  , "#  \\.#"
+  , "#\\ * #"
+  , "L  .\\#"
+  , "######"
+  ]
+
+contest2 = parseMap'
+  [ "#######"
+  , "#..***#"
+  , "#..\\\\\\#"
+  , "#...**#"
+  , "#.*.*\\#"
+  , "LR....#"
+  , "#######"
+  ]
+
+-- contest1.map
+-- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
+test_contest1 = printSim contest1 act
+  where
+    act = parseCommands "DLLLDDRRRLULLDL"
+
+test_contest2 = printSim contest2 act
+  where
+    act = parseCommands "RRUDRRULURULLLLDDDL"
