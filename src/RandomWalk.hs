@@ -6,16 +6,14 @@ module RandomWalk
 import Prelude hiding (catch)
 import Control.Monad
 import Data.Array
-import Data.IORef
 import Data.Maybe
-import System.IO
 import qualified System.Random as Rand
 
 import Move
 import Sim
 
-run :: IORef ([Command], Int) -> GameState -> IO ()
-run bestRef s0 = forever $ walk s0 []
+run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
+run check s0 = forever $ walk s0 []
   where
     stepLim = rangeSize $ bounds $ gMap s0
 
@@ -30,17 +28,6 @@ run bestRef s0 = forever $ walk s0 []
             else do
               c <- randomCommand
               walk (step s c) (c : cmds)
-
-    check :: GameState -> [Command] -> IO ()
-    check s cmds = do
-      (_, bestScore) <- readIORef bestRef
-      let score = gScore s
-      if score > bestScore
-        then do
-          hPutStrLn stderr $ "best score = " ++ show score
-          hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
-          writeIORef bestRef (cmds, score)
-        else return ()
 
 randomCommand :: IO Command
 randomCommand = do

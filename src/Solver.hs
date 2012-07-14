@@ -3,18 +3,31 @@
 module Solver where
 
 import Control.Exception
+import Control.Monad
 import Data.IORef
+import System.IO
 
 import Move
 import Sim
 import qualified RandomWalk
 
 run :: GameState -> IO ([Command], Int)
-run s = do
-  bestRef <- newIORef ([A], 0)  
-  result <- try $ RandomWalk.run bestRef s
+run s0 = do
+  bestRef <- newIORef ([A], 0)
+  let check :: GameState -> [Command] -> IO ()
+      check s cmds = do
+        (_, bestScore) <- readIORef bestRef
+        let score = gScore s
+        when (score > bestScore) $ do
+          hPutStrLn stderr $ "best score = " ++ show score
+          hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
+          writeIORef bestRef (cmds, score)
+
+  result <- try $ RandomWalk.run check s0
+  -- XXX
   case result of
     Right () -> return ()
     Left (_ :: AsyncException) -> return ()
+
   (cmds, score) <- readIORef bestRef
   return (reverse cmds, score)
