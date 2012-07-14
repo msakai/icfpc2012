@@ -11,7 +11,7 @@ data Command
   | D
   | W
   | A
-  deriving (Ord, Eq, Show, Read)
+  deriving (Ord, Eq, Show, Read, Bounded, Enum)
 
 parseCommands :: String -> [Command]
 parseCommands = map (read . return)
