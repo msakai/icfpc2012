@@ -134,28 +134,44 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
 step :: GameState -> Command -> GameState
 step s cmd
   | isJust (gEnd s') = s' -- Win/Abortの場合にはその後のmapのupdateとLoosingの判定はしなくて良いようだ
-  | gMap s'' ! (x,y+1) == Rock && gMap s' ! (x,y+1) /= Rock =
-      -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
-      s''{ gEnd = Just Losing }
-  | gWaterproof s'' >= 0 && gUnderwater s'' > gWaterproof s'' =
-      -- XXX: underwater の判定タイミングよく分かっていない
-      -- flood2.mapで WWWWWWWWWWWWWだと壊れなくて、WWWWWWWWWWWWWW だと壊れるのが、
-      -- validatorと同じなので合っていそうだが。
-      s''{ gEnd = Just Losing }
   | otherwise = s''
   where
     s' = move cmd s
-    s'' = s'{ gMap = update (gMap s')
-            , gWater =
-                if gFlooding s' > 0 && gSteps s' `mod` gFlooding s' == 0
-                  then gWater s' + 1
-                  else gWater s'
-            , gUnderwater = -- XXX: underwater の判定タイミングよく分かっていない
-                if isUnderwater s
-                  then gUnderwater s' + 1
-                  else 0
-            }
-    (x,y) = gPos s''
+    s'' = updateWater s (updateMap s s')
+
+updateMap :: GameState -> GameState -> GameState
+updateMap orig new =
+  new{ gMap = m2
+     , gEnd =
+         -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
+         if gMap new ! (x,y+1) == Rock && gMap orig ! (x,y+1) /= Rock
+           then Just Losing
+           else gEnd new
+     } 
+  where
+    (x,y) = gPos new
+    m2 = update (gMap new)
+
+-- XXX: underwater の判定タイミングとかよく分かっていない
+updateWater :: GameState -> GameState -> GameState
+updateWater orig new =
+  new{ gWater = water
+     , gUnderwater = underwater       
+     , gEnd =
+         if underwater > gWaterproof new
+           then Just Losing
+           else gEnd new
+     }
+  where
+    (x,y) = gPos new
+    water =
+      if gFlooding new > 0 && gSteps new `mod` gFlooding orig == 0
+        then gWater new + 1
+        else gWater new
+    underwater =
+      if isUnderwater orig -- ???
+        then gUnderwater new + 1
+        else 0
 
 stepN :: GameState -> [Command] -> GameState
 stepN s cmds = foldl' step s cmds
