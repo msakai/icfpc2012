@@ -9,6 +9,7 @@ module Sim
 
   -- * simulation
   , step
+  , stepN
   , simulate
   , interactiveSim
 
@@ -155,6 +156,9 @@ step s cmd
             }
     (x,y) = gPos s''
 
+stepN :: GameState -> [Command] -> GameState
+stepN s cmds = foldl' step s cmds
+
 isUnderwater :: GameState -> Bool
 isUnderwater s = gWater s >= y
   where
@@ -196,7 +200,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
             (old:undoBuf') -> go old undoBuf'
         _ | isNothing (gEnd s) && all (`elem` "LRUDWA") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
-          go (foldl' step s cs, trace <> Seq.fromList cs) (curr : undoBuf)
+          go (stepN s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
           putStrLn "parse error"
           prompt curr undoBuf
