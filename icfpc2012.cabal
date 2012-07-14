@@ -27,6 +27,12 @@ Executable sim
   Build-Depends:      base >=4 && <5, array, containers
   Other-Modules:      Map, Move, Sim
 
+Executable lifter
+  Main-is:            LifterMain.hs
+  HS-Source-Dirs:     .
+  Build-Depends:      base >=4 && <5, array, containers
+  Other-Modules:      Map, Move, Sim
+
 Test-suite Test
   Type:              exitcode-stdio-1.0
   HS-Source-Dirs:    .
