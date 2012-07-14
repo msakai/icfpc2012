@@ -140,7 +140,7 @@ step s cmd
   | otherwise = s''
   where
     s' = move cmd s
-    s'' = updateWater s (updateMap s s')
+    s'' = updateWater (updateMap s s')
 
 updateMap :: GameState -> GameState -> GameState
 updateMap orig new = case m2 of
@@ -149,24 +149,43 @@ updateMap orig new = case m2 of
   where
     m2 = update (gMap new)
 
--- XXX: underwater の判定タイミングとかよく分かっていない
-updateWater :: GameState -> GameState -> GameState
-updateWater orig new =
-  new{ gWater = water
+{-|
+処理順:
+
+(1) move
+
+(2) update of map & check if the robot is underwater
+
+(3) update of water level
+
+根拠:
+
+* 「Given a setting of Waterproof n, the robot may be underwater after n
+  consecutive /map updates/. If after the next update it is still underwater,
+  it becomes inoperative.」とあるので、move後の位置で浸水しているときの map update
+  の回数を数えれば良い。
+
+* 「/After/ every 10 steps in the /map update phase/, given by Flooding,
+  the water level will rise by 1.」とあるので水位の更新は、map の update 後
+-}
+updateWater :: GameState -> GameState
+updateWater s =
+    s{ gWater = water
      , gUnderwater = underwater       
      , gEnd =
-         if underwater > gWaterproof new
+         if underwater > gWaterproof s
            then Just Losing
-           else gEnd new
+           else gEnd s
      }
   where
+    flooding = gFlooding s
     water =
-      if gFlooding new > 0 && gSteps new `mod` gFlooding orig == 0
-        then gWater new + 1
-        else gWater new
+      if flooding > 0 && gSteps s `mod` flooding == 0
+        then gWater s + 1
+        else gWater s
     underwater =
-      if isUnderwater orig -- ???
-        then gUnderwater new + 1
+      if isUnderwater s
+        then gUnderwater s + 1
         else 0
 
 stepN :: GameState -> [Command] -> GameState

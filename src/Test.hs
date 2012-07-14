@@ -128,6 +128,14 @@ case_flood5_map_bug1 = do
     s0  = initialStateFromString flood5
     s1  = stepN s0 (act ++ [U])
 
+case_flood5_map_bug2 = do
+  gEnd s1   @?= Just Losing
+  gScore s1 @?= 16
+  where
+    act = parseCommands "DDDDWWWWW"
+    s0  = initialStateFromString flood5
+    s1  = stepN s0 act
+
 flood5 = unlines
   [ "#########"
   , "#.*..#\\.#"
