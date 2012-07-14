@@ -6,6 +6,7 @@ import System.IO
 
 import Map
 import Move
+import Sim
 
 main :: IO ()
 main = do

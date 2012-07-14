@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall -fno-warn-unused-do-bind #-}
 module Map where
 
 import Control.Monad
@@ -84,6 +85,7 @@ parseCell 'L'  = ClosedLambdaLift
 parseCell 'O'  = OpenLambdaLift
 parseCell '.'  = Earth
 parseCell ' '  = Empty
+parseCell _    = error "parseCell: parse error"
 
 showCell :: Cell -> Char
 showCell Robot            = 'R'
@@ -95,6 +97,7 @@ showCell OpenLambdaLift   = 'O'
 showCell Earth            = '.'
 showCell Empty            = ' '
 
+testParseMap :: Map
 testParseMap = parseMap' m
   where
     m = [ "#* *#"
@@ -102,6 +105,7 @@ testParseMap = parseMap' m
         , "#####"
         ]
 
+testShowMap :: Bool
 testShowMap = showMap' (parseMap' m) == m
   where
     m = [ "#* *#"
@@ -109,6 +113,7 @@ testShowMap = showMap' (parseMap' m) == m
         , "#####"
         ]
 
+testUpdate :: Bool
 testUpdate = update (parseMap' m1) == (parseMap' m2)
   where
     m1 = [ "#* *#"
@@ -119,3 +124,24 @@ testUpdate = update (parseMap' m1) == (parseMap' m2)
          , "#***#"
          , "#####"
          ]
+
+contest1 :: Map
+contest1 =  parseMap'
+  [ "######"
+  , "#. *R#"
+  , "#  \\.#"
+  , "#\\ * #"
+  , "L  .\\#"
+  , "######"
+  ]
+
+contest2 :: Map
+contest2 = parseMap'
+  [ "#######"
+  , "#..***#"
+  , "#..\\\\\\#"
+  , "#...**#"
+  , "#.*.*\\#"
+  , "LR....#"
+  , "#######"
+  ]
