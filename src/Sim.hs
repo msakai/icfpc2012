@@ -143,14 +143,16 @@ step s cmd
     s'' = updateWater s (updateMap s s')
 
 updateMap :: GameState -> GameState -> GameState
-updateMap orig new =
-  new{ gMap = m2
-     , gEnd =
+updateMap orig new = case m2 of
+  Nothing -> undefined
+  Just m' -> 
+    new{ gMap = m'
+       , gEnd =
          -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
-         if gMap new ! (x,y+1) == Rock && gMap orig ! (x,y+1) /= Rock
-           then Just Losing
-           else gEnd new
-     } 
+           if gMap new ! (x,y+1) == Rock && gMap orig ! (x,y+1) /= Rock
+             then Just Losing
+             else gEnd new
+       } 
   where
     (x,y) = gPos new
     m2 = update (gMap new)
