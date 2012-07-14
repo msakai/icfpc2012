@@ -217,6 +217,10 @@ interactiveSim s0 = go (s0,Seq.empty) []
               putStrLn "empty undo buffer"
               go (s,trace) undoBuf
             (old:undoBuf') -> go old undoBuf'
+        ":reset" -> do
+          case undoBuf of
+            [] -> go (s,trace) undoBuf
+            _ -> go (last undoBuf) []
         _ | isNothing (gEnd s) && all (`elem` "LRUDWA") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
           go (stepN s cs, trace <> Seq.fromList cs) (curr : undoBuf)
