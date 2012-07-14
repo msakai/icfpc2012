@@ -20,3 +20,9 @@ Library
   Build-Depends:      base >=4 && <5, array
   Hs-Source-Dirs:     .
   Exposed-Modules:    Map, Move
+
+Executable sim
+  Main-is:            SimMain.hs
+  HS-Source-Dirs:     .
+  Build-Depends:      base >=4 && <5, array
+  Other-Modules:      Map, Move
