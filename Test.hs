@@ -12,6 +12,14 @@ import Map
 import Move
 import Sim
 
+case_contest1_map = do
+  gEnd s   @?= Just Winning
+  gScore s @?= 210
+  where
+    act = parseCommands "DLLLDDRRRLULLDL"
+    s0  = initialState contest1 (0,0,10)
+    s   = stepN s0 act
+
 case_contest2_map = do
   gEnd s   @?= Just Winning
   gScore s @?= 281
