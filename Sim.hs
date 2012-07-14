@@ -9,6 +9,7 @@ module Sim
 
   -- * simulation
   , step
+  , stepN
   , simulate
   , interactiveSim
 
@@ -37,18 +38,18 @@ import Metadata
 
 data GameState
   = GameState
-  { gPos     :: !Pos      -- current position of the Robot
-  , gMap     :: !Map      -- current state of the mine
-  , gScore   :: !Int      -- score gained so far
-  , gLambda  :: !Int      -- number of gained Lambdas
-  , gLambdaLeft :: [Pos]  -- left Lambdas' positions
-  , gSteps  :: !Int       
-  , gEnd    :: Maybe EndingCondition
+  { gPos    :: !Pos -- ^ ロボットの現在位置
+  , gMap    :: !Map -- ^ 地図
+  , gScore  :: !Int -- ^ スコア
+  , gLambda :: !Int -- ^ 獲得したラムダの数
+  , gLambdaLeft :: [Pos]  -- ^ 未回収のラムダの位置のリスト
+  , gSteps  :: !Int -- ^ 実行ステップ数
+  , gEnd    :: Maybe EndingCondition -- ^ 終了条件
 
-  , gWater      :: !Int
-  , gFlooding   :: !Int
-  , gWaterproof :: !Int
-  , gUnderwater :: !Int
+  , gWater      :: !Int -- ^ 現在の水位
+  , gFlooding   :: !Int -- ^ 水位上昇ペース
+  , gWaterproof :: !Int -- ^ ロボットが水中にいて大丈夫な時間
+  , gUnderwater :: !Int -- ^ 現在ロボットが水面下にいる継続時間
   }
   deriving (Eq, Show)
 
@@ -65,7 +66,7 @@ initialState m (water,flooding,waterproof)
   , gWater      = water
   , gFlooding   = flooding
   , gWaterproof = waterproof
-  , gUnderwater = 0          -- ロボットが水面下にいる時間
+  , gUnderwater = 0
   }
 
 initialStateFromString :: String -> GameState
@@ -75,8 +76,8 @@ initialStateFromString s = initialState m (water, flooding, waterproof)
     (ls1,ls2) = break ([]==) ls
     m    = parseMap' ls1
     meta = parseMetadata' ls2
-    water      = fromMaybe 0 $ lookup "Water" meta
-    flooding   = fromMaybe 0 $ lookup "Flooding" meta
+    water      = fromMaybe 0  $ lookup "Water" meta
+    flooding   = fromMaybe 0  $ lookup "Flooding" meta
     waterproof = fromMaybe 10 $ lookup "Waterproof" meta                  
 
 printState :: GameState -> IO ()
@@ -156,6 +157,9 @@ step s cmd
             }
     (x,y) = gPos s''
 
+stepN :: GameState -> [Command] -> GameState
+stepN s cmds = foldl' step s cmds
+
 isUnderwater :: GameState -> Bool
 isUnderwater s = gWater s >= y
   where
@@ -179,11 +183,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
     go curr@(s,trace) undoBuf = do
       printState s
       putStrLn ""
-      if isJust (gEnd s)
-        then do
-          putStrLn $ "command: " ++ showCommands (F.toList trace)
-          return ()
-        else prompt curr undoBuf
+      prompt curr undoBuf
     prompt curr@(s,trace) undoBuf = do
       putStr "> "
       hFlush stdout
@@ -199,9 +199,9 @@ interactiveSim s0 = go (s0,Seq.empty) []
               putStrLn "empty undo buffer"
               go (s,trace) undoBuf
             (old:undoBuf') -> go old undoBuf'
-        _ | all (`elem` "LRUDWA") (map toUpper l) -> do
+        _ | isNothing (gEnd s) && all (`elem` "LRUDWA") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
-          go (foldl' step s cs, trace <> Seq.fromList cs) (curr : undoBuf)
+          go (stepN s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
           putStrLn "parse error"
           prompt curr undoBuf
@@ -213,11 +213,11 @@ interactiveSim s0 = go (s0,Seq.empty) []
 -- contest1.map
 -- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
 test_contest1 :: IO ()
-test_contest1 = printSim (initialState contest1 (-1,-1,-1)) act
+test_contest1 = printSim (initialState contest1 (0,0,10)) act
   where
     act = parseCommands "DLLLDDRRRLULLDL"
 
 test_contest2 :: IO ()
-test_contest2 = printSim (initialState contest2 (-1,-1,-1)) act
+test_contest2 = printSim (initialState contest2 (0,0,10)) act
   where
     act = parseCommands "RRUDRRULURULLLLDDDL"
