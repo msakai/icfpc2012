@@ -8,14 +8,17 @@ import Text.Printf
 
 import Map
 
-data Move
+data Command
   = L
   | R
   | U
   | D
   | W
   | A
-  deriving (Ord, Eq, Show)
+  deriving (Ord, Eq, Show, Read)
+
+parseCommands :: String -> [Command]
+parseCommands = map (read . return)
 
 data GameState
   = GameState
@@ -45,22 +48,22 @@ initialState m
   , gEnd    = Nothing
   }
 
-move :: Move -> GameState -> GameState
-move move s@GameState{ gMap = m, gPos = (x,y) } =
-  case move of
+move :: Command -> GameState -> GameState
+move cmd s@GameState{ gMap = m, gPos = (x,y) } =
+  case cmd of
     L -> f (x-1, y)
     R -> f (x+1, y)
     U -> f (x, y+1)
     D -> f (x, y-1)
     W -> s{ gSteps = gSteps s + 1 }
-    A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort }
+    A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
   where
     f (x',y') = 
       case m ! (x',y') of
         Empty          -> s'
         Earth          -> s'
         Lambda         -> s'{ gScore = gScore s' + 25, gLambda = gLambda s' + 1 }
-        OpenLambdaLift -> s'{ gEnd = Just Winning }
+        OpenLambdaLift -> s'{ gEnd = Just Winning, gScore = gScore s' + gLambda s' * 50 }
         Rock
           | x'==x+1 && y'==y &&
             inRange (bounds m) (x+2,y) &&  m ! (x+2,y) == Empty ->
@@ -72,7 +75,7 @@ move move s@GameState{ gMap = m, gPos = (x,y) } =
               s'{ gMap = gMap s' // [((x-2,y), Rock)] }
         _ -> s{ gSteps = gSteps s + 1 } -- invalid
       where
-        m' = m // [((x,y), Empty), ((x',y'), Robot)]    
+        m' = m // ([((x',y'), Robot) | m ! (x',y') /= OpenLambdaLift] ++ [((x,y), Empty)])
         s' = s{ gMap = m'
               , gPos = (x',y')
               , gScore = gScore s - 1
@@ -97,8 +100,9 @@ isValidMove m (x,y) (x',y') =
           -- Additionally, the Rock moves to (x−2,y).
     _ -> False
 
-
-testSim = printSim m act
+-- contest1.map
+-- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
+test_contest1 = printSim m act
   where
     m = parseMap'
         [ "######"
@@ -108,12 +112,9 @@ testSim = printSim m act
         , "L  .\\#"
         , "######"
         ]
-    act = [D,L,L,A]
+    act = parseCommands "DLLLDDRRRLULLDL"
 
-{-
-TODO: http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と照合
--}
-printSim :: Map -> [Move] -> IO ()
+printSim :: Map -> [Command] -> IO ()
 printSim m ms = do
   forM_ (simulate (initialState m) ms) $ \s -> do
     putStr $ showMap (gMap s)
@@ -121,21 +122,20 @@ printSim m ms = do
     printf "End: %s\n" $ show (gEnd s)
     putStrLn ""
 
-simulate :: GameState -> [Move] -> [GameState]
+simulate :: GameState -> [Command] -> [GameState]
 simulate s [] = [s]
 simulate s (m:ms)
   | isJust (gEnd s) = [s]
   | otherwise = s : simulate (step s m) ms
 
--- 判定順これで良いのか自信なし
-step :: GameState -> Move -> GameState
-step s mv
-  | gEnd s'' == Just Winning   = s''
-  | gEnd s'  == Just Abort     = s' -- XXX: Abortした場合にはその後のmapのupdateとLoosingの判定はしなくてよい?
-  | gMap s'' ! (x,y+1) == Rock && gMap s ! (x,y+1) /= Rock = -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
+step :: GameState -> Command -> GameState
+step s cmd
+  | isJust (gEnd s') = s' -- Win/Abortの場合にはその後のmapのupdateとLoosingの判定はしなくて良いようだ
+  | gMap s'' ! (x,y+1) == Rock && gMap s' ! (x,y+1) /= Rock =
+      -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
       s''{ gEnd = Just Losing }
   | otherwise = s''
   where
-    s' = move mv s
+    s' = move cmd s
     s'' = s'{ gMap = update (gMap s') }
     (x,y) = gPos s''
