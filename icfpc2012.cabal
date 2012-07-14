@@ -1,0 +1,22 @@
+Name:           icfpc2012
+Version:        0.0.0
+Cabal-Version:  >= 1.8
+License:        BSD3
+Author:         Team Sampou
+Maintainer:     Team Sampou <masahiro.sakai@gmail.com>
+Synopsis:       Lambda Lifter
+Description:    icfpc2012
+Stability:      experimental
+Build-Type:	Simple
+Extra-Source-Files:
+  README.md
+  samples/*.map
+
+Source-Repository head
+  type:     git
+  location: git://github.com/msakai/icfpc2012.git
+
+Library
+  Build-Depends:      base >=4 && <5, array
+  Hs-Source-Dirs:     .
+  Exposed-Modules:    Map, Move
