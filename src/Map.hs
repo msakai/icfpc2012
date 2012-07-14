@@ -19,8 +19,8 @@ data Cell
   | Empty
   deriving (Ord, Eq, Show)
 
-update :: Map -> Map
-update m = m // xs
+update :: Map -> Maybe Map
+update m = Just (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
 
@@ -28,7 +28,7 @@ update m = m // xs
 
     get p
       | inRange (bounds m) p = m ! p
-      | otherwise = Empty
+      | otherwise = Wall
 
     lambdaRemaining = Lambda `elem` elems m
 
@@ -108,7 +108,7 @@ testShowMap = showMap' (parseMap' m) == m
         ]
 
 testUpdate :: Bool
-testUpdate = update (parseMap' m1) == (parseMap' m2)
+testUpdate = update (parseMap' m1) == Just (parseMap' m2)
   where
     m1 = [ "#* *#"
          , "#* *#"
