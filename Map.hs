@@ -46,8 +46,8 @@ update m = m // xs
               [((x,y), Empty), ((x-1, y-1), Rock)]
           | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
               [((x,y), Empty), ((x+1, y-1), Rock)]
-          | match [((x,y),ClosedLambdaLift)] && not lambdaRemaining ->
-              [((x,y), OpenLambdaLift)]
+        ClosedLambdaLift | not lambdaRemaining -> 
+          [((x,y), OpenLambdaLift)]
         _ -> mzero
 
 parseMap :: String -> Map
