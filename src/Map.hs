@@ -19,9 +19,9 @@ data Cell
   | Empty
   deriving (Ord, Eq, Show)
 
-update :: Map -> Maybe Map
-update m = if crash m xs then Nothing
-           else Just (m // xs)
+update :: Map -> Either Map Map
+update m = if crash m xs then Left (m // xs)
+           else Right (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
 
@@ -117,7 +117,7 @@ testShowMap = showMap' (parseMap' m) == m
         ]
 
 testUpdate :: Bool
-testUpdate = update (parseMap' m1) == Just (parseMap' m2)
+testUpdate = update (parseMap' m1) == Right (parseMap' m2)
   where
     m1 = [ "#* *#"
          , "#* *#"

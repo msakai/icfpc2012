@@ -144,8 +144,8 @@ step s cmd
 
 updateMap :: GameState -> GameState -> GameState
 updateMap orig new = case m2 of
-  Nothing -> new { gEnd = Just Losing }
-  Just m' -> new { gMap = m' } 
+  Left  m' -> new { gMap = m', gEnd = Just Losing }
+  Right m' -> new { gMap = m' } 
   where
     m2 = update (gMap new)
 
