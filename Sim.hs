@@ -71,9 +71,9 @@ initialStateFromString s = initialState m (water, flooding, waterproof)
     (ls1,ls2) = break ([]==) ls
     m    = parseMap' ls1
     meta = parseMetadata' ls2
-    water      = fromMaybe (-1) $ lookup "Water" meta
-    flooding   = fromMaybe (-1) $ lookup "Flooding" meta
-    waterproof = fromMaybe (-1) $ lookup "Waterproof" meta                  
+    water      = fromMaybe 0 $ lookup "Water" meta
+    flooding   = fromMaybe 0 $ lookup "Flooding" meta
+    waterproof = fromMaybe 10 $ lookup "Waterproof" meta                  
 
 printState :: GameState -> IO ()
 printState s = do
