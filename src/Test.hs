@@ -120,6 +120,30 @@ flood2 = unlines
   , "Waterproof 3"
   ]
 
+case_flood5_map_bug1 = do
+  gEnd s1   @?= Just Losing
+  gScore s1 @?= 108
+  where
+    act = parseCommands "DRDRDRDWWUUDDRRL"
+    s0  = initialStateFromString flood5
+    s1  = stepN s0 (act ++ [U])
+
+flood5 = unlines
+  [ "#########"
+  , "#.*..#\\.#"
+  , "#.\\..#\\.L"
+  , "#.R .##.#"
+  , "#.\\  ...#"
+  , "#..\\  ..#"
+  , "#...\\  ##"
+  , "#....\\ \\#"
+  , "#########"
+  , ""
+  , "Water 2"
+  , "Flooding 11"
+  , "Waterproof 5"
+  ]
+
 case_example = do
   gEnd s   @?= Just Winning
   where
