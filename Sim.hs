@@ -21,6 +21,9 @@ import Data.Array
 import Data.Char
 import Data.List
 import Data.Maybe
+import Data.Monoid
+import qualified Data.Foldable as F
+import qualified Data.Sequence as Seq
 import System.IO
 import Text.Printf
 
@@ -170,14 +173,14 @@ printSim s ms = do
     putStrLn ""
 
 interactiveSim :: GameState -> IO ()
-interactiveSim s0 = go s0 []
+interactiveSim s0 = go s0 Seq.empty
   where
     go s trace = do
       printState s
       putStrLn ""
       if isJust (gEnd s)
         then do
-          putStrLn $ "trace: " ++ showCommands (reverse trace)
+          putStrLn $ "command: " ++ showCommands (F.toList trace)
           return ()
         else prompt s trace
     prompt s trace = do
@@ -187,11 +190,11 @@ interactiveSim s0 = go s0 []
       case l of
         ":quit" -> return ()
         ":command" -> do
-          putStrLn $ "command: " ++ showCommands (reverse trace)
+          putStrLn $ "command: " ++ showCommands (F.toList trace)
           prompt s trace
         _ | all (`elem` "LRUDWA") l -> do
           let cs = parseCommands l
-          go (foldl' step s cs) (reverse cs ++ trace)
+          go (foldl' step s cs) (trace <> Seq.fromList cs)
         _ -> do
           putStrLn "parse error"
           prompt s trace
