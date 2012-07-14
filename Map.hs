@@ -50,9 +50,8 @@ update m = m // xs
             get (x+1, y) == Empty &&
             get (x+1, y-1) == Empty ->
               [((x,y), Empty), ((x+1, y-1), Rock)]
-
-          | get (x,y) == ClosedLambdaLift &&
-            not lambdaRemaining ->
+        ClosedLambdaLift
+          | not lambdaRemaining ->
               [((x,y), OpenLambdaLift)]
         _ -> mzero
 
