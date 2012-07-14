@@ -26,3 +26,10 @@ Executable sim
   HS-Source-Dirs:     .
   Build-Depends:      base >=4 && <5, array, containers
   Other-Modules:      Map, Move, Sim
+
+Test-suite Test
+  Type:              exitcode-stdio-1.0
+  HS-Source-Dirs:    .
+  Main-is:           Test.hs
+  Build-depends:     base >=4 && <5, array, containers, test-framework, test-framework-th, test-framework-hunit, HUnit
+  Extensions: TemplateHaskell
