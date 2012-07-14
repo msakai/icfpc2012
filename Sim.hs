@@ -37,17 +37,17 @@ import Metadata
 
 data GameState
   = GameState
-  { gPos    :: !Pos
-  , gMap    :: !Map
-  , gScore  :: !Int
-  , gLambda :: !Int
-  , gSteps  :: !Int
-  , gEnd    :: Maybe EndingCondition
+  { gPos    :: !Pos -- ^ ロボットの現在位置
+  , gMap    :: !Map -- ^ 地図
+  , gScore  :: !Int -- ^ スコア
+  , gLambda :: !Int -- ^ 獲得したラムダの数
+  , gSteps  :: !Int -- ^ 実行ステップ数
+  , gEnd    :: Maybe EndingCondition -- ^ 終了条件
 
-  , gWater      :: !Int
-  , gFlooding   :: !Int
-  , gWaterproof :: !Int
-  , gUnderwater :: !Int
+  , gWater      :: !Int -- ^ 現在の水位
+  , gFlooding   :: !Int -- ^ 水位上昇ペース
+  , gWaterproof :: !Int -- ^ ロボットが水中にいて大丈夫な時間
+  , gUnderwater :: !Int -- ^ 現在ロボットが水面下にいる継続時間
   }
   deriving (Eq, Show)
 
@@ -64,7 +64,7 @@ initialState m (water,flooding,waterproof)
   , gWater      = water
   , gFlooding   = flooding
   , gWaterproof = waterproof
-  , gUnderwater = 0          -- ロボットが水面下にいる時間
+  , gUnderwater = 0
   }
 
 initialStateFromString :: String -> GameState
@@ -74,8 +74,8 @@ initialStateFromString s = initialState m (water, flooding, waterproof)
     (ls1,ls2) = break ([]==) ls
     m    = parseMap' ls1
     meta = parseMetadata' ls2
-    water      = fromMaybe 0 $ lookup "Water" meta
-    flooding   = fromMaybe 0 $ lookup "Flooding" meta
+    water      = fromMaybe 0  $ lookup "Water" meta
+    flooding   = fromMaybe 0  $ lookup "Flooding" meta
     waterproof = fromMaybe 10 $ lookup "Waterproof" meta                  
 
 printState :: GameState -> IO ()
