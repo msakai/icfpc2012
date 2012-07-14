@@ -178,11 +178,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
     go curr@(s,trace) undoBuf = do
       printState s
       putStrLn ""
-      if isJust (gEnd s)
-        then do
-          putStrLn $ "command: " ++ showCommands (F.toList trace)
-          return ()
-        else prompt curr undoBuf
+      prompt curr undoBuf
     prompt curr@(s,trace) undoBuf = do
       putStr "> "
       hFlush stdout
@@ -198,7 +194,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
               putStrLn "empty undo buffer"
               go (s,trace) undoBuf
             (old:undoBuf') -> go old undoBuf'
-        _ | all (`elem` "LRUDWA") (map toUpper l) -> do
+        _ | isNothing (gEnd s) && all (`elem` "LRUDWA") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
           go (foldl' step s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
