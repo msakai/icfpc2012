@@ -56,6 +56,26 @@ contest3 = unlines
   , "########"
   ]
 
+case_contest4_map = do
+  gEnd s   @?= Just Winning
+  gScore s @?= 567
+  where
+    act = parseCommands "DDRDRDRRRLLLLLUUUUURDDRRRRUUULDRR"
+    s0  = initialStateFromString contest4
+    s   = stepN s0 act
+
+contest4 = unlines
+  [ "#########"
+  , "#.*..#\\.#"
+  , "#.\\..#\\.L"
+  , "#.R .##.#"
+  , "#.\\  ...#"
+  , "#..\\  ..#"
+  , "#...\\  ##"
+  , "#....\\ \\#"
+  , "#########"
+  ]
+
 case_contest7_map = do
   gEnd s   @?= Just Winning
   gScore s @?= 867
