@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Monad
 import System.Environment
 import System.Exit
 import System.IO
@@ -7,15 +8,15 @@ import System.IO
 import Map
 import Move
 import Sim
+import Metadata
 
 main :: IO ()
 main = do
   args <- getArgs
   case args of
     [fname] -> do
-      s <- readFile fname
-      let m = parseMap s
-      interactiveSim m
+      s <- liftM initialStateFromString $ readFile fname
+      interactiveSim s
     _ -> do
       hPutStrLn stderr "Usage: sim file.map"
       exitFailure

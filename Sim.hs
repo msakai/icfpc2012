@@ -4,6 +4,7 @@ module Sim
   -- * The GameState type
     GameState (..)
   , initialState
+  , initialStateFromString
   , printState
 
   -- * simulation
@@ -24,6 +25,7 @@ import Text.Printf
 
 import Map
 import Move
+import Metadata
 
 {--------------------------------------------------------------------
   GameState
@@ -37,11 +39,16 @@ data GameState
   , gLambda :: !Int
   , gSteps  :: !Int
   , gEnd    :: Maybe EndingCondition
+
+  , gWater      :: !Int
+  , gFlooding   :: !Int
+  , gWaterproof :: !Int
+  , gUnderwater :: !Int
   }
   deriving (Eq, Show)
 
-initialState :: Map -> GameState
-initialState m
+initialState :: Map -> (Int,Int,Int) -> GameState
+initialState m (water,flooding,waterproof)
   = GameState
   { gPos    = head [i | (i,Robot) <- assocs m]
   , gMap    = m
@@ -49,13 +56,33 @@ initialState m
   , gLambda = 0
   , gSteps  = 0
   , gEnd    = Nothing
+
+  , gWater      = water
+  , gFlooding   = flooding
+  , gWaterproof = waterproof
+  , gUnderwater = 0          -- ロボットが水面下にいる時間
   }
+
+initialStateFromString :: String -> GameState
+initialStateFromString s = initialState m (water, flooding, waterproof)
+  where
+    ls = lines s
+    (ls1,ls2) = break ([]==) ls
+    m    = parseMap' ls1
+    meta = parseMetadata' ls2
+    water      = fromMaybe (-1) $ lookup "Water" meta
+    flooding   = fromMaybe (-1) $ lookup "Flooding" meta
+    waterproof = fromMaybe (-1) $ lookup "Waterproof" meta                  
 
 printState :: GameState -> IO ()
 printState s = do
   putStr $ showMap (gMap s)
   printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
-  printf "End: %s\n" $ show (gEnd s)
+  printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
+    (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
+  case gEnd s of
+    Nothing -> return ()
+    Just w -> printf "End: %s\n" $ show w
 
 {--------------------------------------------------------------------
   Simulation
@@ -101,11 +128,28 @@ step s cmd
   | gMap s'' ! (x,y+1) == Rock && gMap s' ! (x,y+1) /= Rock =
       -- XXX: 最期のmapのupdateで配置されたということをアドホックに表現している
       s''{ gEnd = Just Losing }
+  | gWaterproof s'' >= 0 && gUnderwater s'' > gWaterproof s'' =
+      -- XXX: underwater の判定タイミングよく分かっていない
+      s''{ gEnd = Just Losing }
   | otherwise = s''
   where
     s' = move cmd s
-    s'' = s'{ gMap = update (gMap s') }
+    s'' = s'{ gMap = update (gMap s')
+            , gWater =
+                if gFlooding s' > 0 && gSteps s' `mod` gFlooding s' == 0
+                  then gWater s' + 1
+                  else gWater s'
+            , gUnderwater = -- XXX: underwater の判定タイミングよく分かっていない
+                if isUnderwater s
+                  then gUnderwater s' + 1
+                  else 0
+            }
     (x,y) = gPos s''
+
+isUnderwater :: GameState -> Bool
+isUnderwater s = gWater s >= y
+  where
+    (_,y) = gPos s
 
 simulate :: GameState -> [Command] -> [GameState]
 simulate s [] = [s]
@@ -113,14 +157,14 @@ simulate s (m:ms)
   | isJust (gEnd s) = [s]
   | otherwise = s : simulate (step s m) ms
 
-printSim :: Map -> [Command] -> IO ()
-printSim m ms = do
-  forM_ (simulate (initialState m) ms) $ \s -> do
-    printState s
+printSim :: GameState -> [Command] -> IO ()
+printSim s ms = do
+  forM_ (simulate s ms) $ \s' -> do
+    printState s'
     putStrLn ""
 
-interactiveSim :: Map -> IO ()
-interactiveSim m = go (initialState m) []
+interactiveSim :: GameState -> IO ()
+interactiveSim s0 = go s0 []
   where
     go s trace = do
       printState s
@@ -153,11 +197,11 @@ interactiveSim m = go (initialState m) []
 -- contest1.map
 -- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
 test_contest1 :: IO ()
-test_contest1 = printSim contest1 act
+test_contest1 = printSim (initialState contest1 (-1,-1,-1)) act
   where
     act = parseCommands "DLLLDDRRRLULLDL"
 
 test_contest2 :: IO ()
-test_contest2 = printSim contest2 act
+test_contest2 = printSim (initialState contest2 (-1,-1,-1)) act
   where
     act = parseCommands "RRUDRRULURULLLLDDDL"
