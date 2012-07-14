@@ -20,6 +20,14 @@ case_contest1_map = do
     s0  = initialState contest1 (0,0,10)
     s   = stepN s0 act
 
+case_contest1_loose_map = do
+  gEnd s   @?= Just Losing
+  -- gScore s @?= ???
+  where
+    act = parseCommands "DD"
+    s0  = initialState contest1 (0,0,10)
+    s   = stepN s0 act
+
 case_contest2_map = do
   gEnd s   @?= Just Winning
   gScore s @?= 281

@@ -53,10 +53,9 @@ getCell m p
   | otherwise            = Wall
 
 crash :: Map -> [(Pos,Cell)] -> Bool
-crash _ [] = False
-crash m (((x,y),Rock) : cs)
+crash _ []     = False
+crash m (((x,y),Rock) : _)
   | getCell m (x,y-1) == Robot = True
-  | otherwise                  = crash m cs
 crash m (_:cs) = crash m cs
 
 parseMap :: String -> Map
