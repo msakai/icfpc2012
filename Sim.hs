@@ -19,6 +19,7 @@ module Sim
 import Control.Monad
 import Data.Array
 import Data.Char
+import Data.List
 import Data.Maybe
 import System.IO
 import Text.Printf
@@ -183,9 +184,9 @@ interactiveSim s0 = go s0 []
         ":command" -> do
           putStrLn $ "command: " ++ showCommands (reverse trace)
           prompt s trace
-        [c] | c `elem` "LRUDWA" -> do
-          let cmd = read [c]
-          go (step s cmd) (cmd : trace)
+        _ | all (`elem` "LRUDWA") l -> do
+          let cs = parseCommands l
+          go (foldl' step s cs) (reverse cs ++ trace)
         _ -> do
           putStrLn "parse error"
           prompt s trace
