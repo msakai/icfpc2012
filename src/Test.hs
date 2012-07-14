@@ -20,9 +20,9 @@ case_contest1_map = do
     s0  = initialState contest1 (0,0,10)
     s   = stepN s0 act
 
-case_contest1_loose_map = do
+case_contest1_map_losing = do
   gEnd s   @?= Just Losing
-  -- gScore s @?= ???
+  gScore s @?= -2
   where
     act = parseCommands "DD"
     s0  = initialState contest1 (0,0,10)
@@ -38,9 +38,9 @@ case_contest2_map = do
 
 case_contest3_map = do
   gEnd s   @?= Just Winning
-  gScore s @?= 270
+  gScore s @?= 275
   where
-    act = parseCommands "LLDDDRRRRRDDLLWLRLLLDURRRUURRR"
+    act = parseCommands "LDDDRRRRDDLLLLLDURRRUURRR"
     s0  = initialStateFromString contest3
     s   = stepN s0 act
 
@@ -58,9 +58,9 @@ contest3 = unlines
 
 case_contest4_map = do
   gEnd s   @?= Just Winning
-  gScore s @?= 567
+  gScore s @?= 575
   where
-    act = parseCommands "DDRDRDRRRLLLLLUUUUURDDRRRRUUULDRR"
+    act = parseCommands "DUURDDDDRDRRRLUUURUUULDRR"
     s0  = initialStateFromString contest4
     s   = stepN s0 act
 
