@@ -16,6 +16,8 @@ main = do
   case args of
     [fname] -> do
       s <- liftM initialStateFromString $ readFile fname
+      putStrLn "Commands: :quit, :undo, :dump"
+      putStrLn ""
       interactiveSim s
     _ -> do
       hPutStrLn stderr "Usage: sim file.map"

@@ -173,31 +173,37 @@ printSim s ms = do
     putStrLn ""
 
 interactiveSim :: GameState -> IO ()
-interactiveSim s0 = go s0 Seq.empty
+interactiveSim s0 = go (s0,Seq.empty) []
   where
-    go s trace = do
+    go curr@(s,trace) undoBuf = do
       printState s
       putStrLn ""
       if isJust (gEnd s)
         then do
           putStrLn $ "command: " ++ showCommands (F.toList trace)
           return ()
-        else prompt s trace
-    prompt s trace = do
+        else prompt curr undoBuf
+    prompt curr@(s,trace) undoBuf = do
       putStr "> "
       hFlush stdout
       l <- liftM (filter (not . isSpace)) getLine
       case l of
         ":quit" -> return ()
-        ":command" -> do
-          putStrLn $ "command: " ++ showCommands (F.toList trace)
-          prompt s trace
+        ":dump" -> do
+          putStrLn $ showCommands (F.toList trace)
+          prompt (s,trace) undoBuf
+        ":undo" -> do
+          case undoBuf of
+            [] -> do
+              putStrLn "empty undo buffer"
+              go (s,trace) undoBuf
+            (old:undoBuf') -> go old undoBuf'
         _ | all (`elem` "LRUDWA") l -> do
           let cs = parseCommands l
-          go (foldl' step s cs) (trace <> Seq.fromList cs)
+          go (foldl' step s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
           putStrLn "parse error"
-          prompt s trace
+          prompt curr undoBuf
 
 {--------------------------------------------------------------------
   Tests
