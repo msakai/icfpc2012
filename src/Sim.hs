@@ -136,6 +136,7 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
 
 step :: GameState -> Command -> GameState
 step s cmd
+  | isJust (gEnd s)  = s  -- 終了済みなら何もしない (エラーにすべき?)
   | isJust (gEnd s') = s' -- Win/Abortの場合にはその後のmapのupdateとLoosingの判定はしなくて良いようだ
   | otherwise = updateWater (updateMap s')
   where

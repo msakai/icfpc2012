@@ -3,9 +3,11 @@ module RandomWalk
   ( run
   ) where
 
+import Prelude hiding (catch)
 import Control.Monad
 import Data.Array
 import Data.IORef
+import Data.Maybe
 import System.IO
 import qualified System.Random as Rand
 
@@ -23,8 +25,11 @@ run bestRef s0 = forever $ walk s0 []
         then return ()
         else do
           check (step s A) (A : cmds)
-          c <- randomCommand
-          walk (step s c) (c : cmds)
+          if isJust (gEnd s)
+            then return ()
+            else do
+              c <- randomCommand
+              walk (step s c) (c : cmds)
 
     check :: GameState -> [Command] -> IO ()
     check s cmds = do
