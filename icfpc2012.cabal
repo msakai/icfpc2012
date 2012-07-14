@@ -18,6 +18,10 @@ Source-Repository head
   type:     git
   location: git://github.com/msakai/icfpc2012.git
 
+Flag Static
+  Description: force static linking
+  Default: False
+
 Library
   Build-Depends:      base >=4 && <5, array, containers
   Hs-Source-Dirs:     src
@@ -34,6 +38,8 @@ Executable lifter
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers
   Other-Modules:      Map, Move, Sim
+  if flag(Static) && impl(ghc)
+    GHC-Options: -static -optl-static -optl-pthread
 
 Test-suite Test
   Type:              exitcode-stdio-1.0
