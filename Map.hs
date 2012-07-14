@@ -23,6 +23,8 @@ update m = m // xs
   where
     ((x1,y1),(x2,y2)) = bounds m
 
+    match = all (\(pos,cell) -> get pos == cell)
+
     get p
       | inRange (bounds m) p = m ! p
       | otherwise = Empty
@@ -35,23 +37,15 @@ update m = m // xs
       let c = m ! (x,y)
       case c of
         Rock
-          | get (x, y-1) == Empty ->
+          | match [((x, y-1),Empty)] ->
               [((x,y), Empty), ((x, y-1), Rock)]
-          | get (x, y-1) == Rock &&
-            get (x+1, y) == Empty &&
-            get (x+1, y-1) == Empty ->
+          | match [((x, y-1),Rock), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
               [((x,y), Empty), ((x+1, y-1), Rock)]
-          | get (x, y-1) == Rock &&
-            get (x-1, y) == Empty &&
-            get (x-1, y-1) == Empty ->
+          | match [((x, y-1),Rock), ((x-1, y),Empty), ((x-1, y-1),Empty)] ->
               [((x,y), Empty), ((x-1, y-1), Rock)]
-
-          | get (x, y-1) == Lambda &&
-            get (x+1, y) == Empty &&
-            get (x+1, y-1) == Empty ->
+          | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
               [((x,y), Empty), ((x+1, y-1), Rock)]
-        ClosedLambdaLift
-          | not lambdaRemaining ->
+          | match [((x,y),ClosedLambdaLift)] && not lambdaRemaining ->
               [((x,y), OpenLambdaLift)]
         _ -> mzero
 
