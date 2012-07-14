@@ -166,7 +166,6 @@ updateWater orig new =
            else gEnd new
      }
   where
-    (x,y) = gPos new
     water =
       if gFlooding new > 0 && gSteps new `mod` gFlooding orig == 0
         then gWater new + 1
@@ -199,7 +198,7 @@ printSim s ms = do
 interactiveSim :: GameState -> IO ()
 interactiveSim s0 = go (s0,Seq.empty) []
   where
-    go curr@(s,trace) undoBuf = do
+    go curr@(s,_) undoBuf = do
       printState s
       putStrLn ""
       prompt curr undoBuf
