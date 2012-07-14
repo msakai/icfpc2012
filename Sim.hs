@@ -134,6 +134,8 @@ step s cmd
       s''{ gEnd = Just Losing }
   | gWaterproof s'' >= 0 && gUnderwater s'' > gWaterproof s'' =
       -- XXX: underwater の判定タイミングよく分かっていない
+      -- flood2.mapで WWWWWWWWWWWWWだと壊れなくて、WWWWWWWWWWWWWW だと壊れるのが、
+      -- validatorと同じなので合っていそうだが。
       s''{ gEnd = Just Losing }
   | otherwise = s''
   where
