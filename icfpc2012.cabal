@@ -37,7 +37,7 @@ Executable lifter
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      Map, Move, Sim, Solver
+  Other-Modules:      Map, Move, Sim, Solver, RandomWalk
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
