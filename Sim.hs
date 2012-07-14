@@ -96,7 +96,7 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     R -> f (x+1, y)
     U -> f (x, y+1)
     D -> f (x, y-1)
-    W -> s{ gSteps = gSteps s + 1 }
+    W -> s{ gScore = gScore s - 1, gSteps = gSteps s + 1 }
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
   where
     f (x',y') = 
@@ -114,7 +114,10 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
             inRange (bounds m) (x-2,y) &&  m ! (x-2,y) == Empty ->
               -- Additionally, the Rock moves to (x-2,y).
               s'{ gMap = gMap s' // [((x-2,y), Rock)] }
-        _ -> s{ gSteps = gSteps s + 1 } -- invalid
+        _ -> -- invalid
+          s{ gScore = gScore s - 1
+           , gSteps = gSteps s + 1
+           } 
       where
         m' = m // ([((x',y'), Robot) | m ! (x',y') /= OpenLambdaLift] ++ [((x,y), Empty)])
         s' = s{ gMap = m'
