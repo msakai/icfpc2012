@@ -137,17 +137,16 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
 step :: GameState -> Command -> GameState
 step s cmd
   | isJust (gEnd s') = s' -- Win/Abortの場合にはその後のmapのupdateとLoosingの判定はしなくて良いようだ
-  | otherwise = s''
+  | otherwise = updateWater (updateMap s')
   where
     s' = move cmd s
-    s'' = updateWater (updateMap s s')
 
-updateMap :: GameState -> GameState -> GameState
-updateMap orig new = case m2 of
-  Left  m' -> new { gMap = m', gEnd = Just Losing }
-  Right m' -> new { gMap = m' } 
+updateMap :: GameState -> GameState
+updateMap s = case m2 of
+  Left  m' -> s { gMap = m', gEnd = Just Losing }
+  Right m' -> s { gMap = m' } 
   where
-    m2 = update (gMap new)
+    m2 = update (gMap s)
 
 {-|
 処理順:
