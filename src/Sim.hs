@@ -241,19 +241,3 @@ interactiveSim s0 = go (s0,Seq.empty) []
         _ -> do
           putStrLn "parse error"
           prompt curr undoBuf
-
-{--------------------------------------------------------------------
-  Tests
---------------------------------------------------------------------}
-
--- contest1.map
--- http://www.undecidable.org.uk/~edwin/cgi-bin/weblifter.cgi と結果が一致するのを確認
-test_contest1 :: IO ()
-test_contest1 = printSim (initialState contest1 (0,0,10)) act
-  where
-    act = parseCommands "DLLLDDRRRLULLDL"
-
-test_contest2 :: IO ()
-test_contest2 = printSim (initialState contest2 (0,0,10)) act
-  where
-    act = parseCommands "RRUDRRULURULLLLDDDL"
