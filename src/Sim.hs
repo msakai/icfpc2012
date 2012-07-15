@@ -112,7 +112,8 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     U -> f (x, y+1)
     D -> f (x, y-1)
     W -> s1
-    S -> s1{ gMap = applyRazor (x,y) m, gRazors = gRazors s - 1 }
+    S | gRazors s1 > 0 -> s1{ gMap = applyRazor (x,y) m, gRazors = gRazors s1 - 1 }
+      | otherwise      -> s1
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
   where
     s1 = s{ gSteps = gSteps s + 1, gScore = gScore s - 1 }
