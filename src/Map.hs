@@ -3,9 +3,9 @@ module Map where
 
 import Control.Monad
 import Data.Array
+import Data.List
 
 type Map = Array Pos Cell
-
 type Pos = (Int,Int)
 
 data Cell
@@ -17,20 +17,51 @@ data Cell
   | OpenLambdaLift
   | Earth
   | Empty
+  | Trampoline Char
+  | Target Char
   | Beard
   | Razor
   deriving (Ord, Eq, Show)
+
+cell2Char :: Cell -> Char
+cell2Char cell = case cell of
+  Robot            -> 'R'
+  Wall             -> '#'
+  Rock             -> '*'
+  Lambda           -> '\\'
+  ClosedLambdaLift -> 'L'
+  OpenLambdaLift   -> 'O'
+  Earth            -> '.'
+  Empty            -> ' '
+  Trampoline c     -> c
+  Target c         -> c
+  Beard            -> 'W'
+  Razor            -> '!'
+
+showMap :: Map -> String
+showMap = unlines . showMap'
+
+showMap' :: Map -> [String]
+showMap' mp
+ = transpose $ reverse 
+             $ slices m 
+             $ map cell2Char 
+             $ elems mp
+   where (_,(_,m)) = bounds mp
+
+slices :: Int -> [a] -> [[a]]
+slices n = unfoldr phi
+  where
+    phi [] = Nothing
+    phi xs = Just $ splitAt n xs
 
 update :: Map -> Either Map Map
 update m = if crash m xs then Left (m // xs)
            else Right (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
-
     match = all (\(pos,cell) -> getCell m pos == cell)
-
     lambdaRemaining = Lambda `elem` elems m
-
     xs = do
       y <- [y1..y2]
       x <- [x1..x2]
@@ -72,14 +103,6 @@ parseMap' ls = array ((1,1),(n,m)) $ do
     m = length ls
     n = maximum [length l | l<-ls]
 
-showMap :: Map -> String
-showMap = unlines . showMap'
-
-showMap' :: Map -> [String]
-showMap' m = [[showCell (m ! (x,y)) | x <- [x1..x2]] | y <- [y2,y2-1..y1]]
-  where
-    ((x1,y1),(x2,y2)) = bounds m
-
 parseCell :: Char -> Cell
 parseCell 'R'  = Robot
 parseCell '#'  = Wall
@@ -91,20 +114,13 @@ parseCell '.'  = Earth
 parseCell ' '  = Empty
 parseCell 'W'  = Beard
 parseCell '!'  = Razor
+parseCell c 
+  | c `elem` "ABCDEFGHI" = Trampoline c
+  | c `elem` "123456789" = Target c
 parseCell _    = error "parseCell: parse error"
 
 showCell :: Cell -> Char
-showCell Robot            = 'R'
-showCell Wall             = '#'
-showCell Rock             = '*'
-showCell Lambda           = '\\'
-showCell ClosedLambdaLift = 'L'
-showCell OpenLambdaLift   = 'O'
-showCell Earth            = '.'
-showCell Empty            = ' '
-showCell Beard            = 'W'
-showCell Razor            = '!'
-
+showCell = cell2Char
 
 testParseMap :: Map
 testParseMap = parseMap' m

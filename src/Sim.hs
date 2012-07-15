@@ -31,10 +31,11 @@ import Text.Printf
 import Map
 import Move
 import Metadata
+import GameState
 
 {--------------------------------------------------------------------
   GameState
---------------------------------------------------------------------}
+--------------------------------------------------------------------
 
 data GameState
   = GameState
@@ -101,7 +102,7 @@ printState s = do
   case gEnd s of
     Nothing -> return ()
     Just w -> printf "End: %s\n" $ show w
-
+-}
 {--------------------------------------------------------------------
   Simulation
 --------------------------------------------------------------------}
@@ -119,7 +120,6 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
   where
     s1 = s{ gSteps = gSteps s + 1, gScore = gScore s - 1 }
-
     f xy@(x',y') = 
       case m ! (x',y') of
         Empty          -> s'

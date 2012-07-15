@@ -5,6 +5,7 @@ import Text.Printf
 
 import Map
 import Metadata
+import Move (EndingCondition)
 
 data GameState
  = GameState
@@ -29,12 +30,6 @@ data GameState
  , gRazors     :: !Int                   -- ^ ロボットが持つ剃刀の数
  }
  deriving (Eq, Show)
-
-data EndingCondition
- = Wining
- | Losing
- | Abort
- deriving (Eq, Ord, Enum, Show)
 
 initialState :: Map -> Metadata -> GameState
 initialState m meta
@@ -70,7 +65,7 @@ initialStateFromString s = initialState m meta
     ls = lines s
     (ls1,ls2) = break ([]==) ls
     m    = parseMap' ls1
-    meta = parseMetadata' ls2
+    meta = parseMetadata' (dropWhile null ls2)
 
 printState :: GameState -> IO ()
 printState s = do
