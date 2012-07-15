@@ -61,7 +61,8 @@ initialState m meta
   , gSteps      = 0
   , gEnd        = Nothing
   , gFallings   = [ (i,fromJust fallto) 
-                  | (i,Rock) <- assocs m
+                  | (i,c) <- assocs m
+                  , isRock c
                   , let fallto = falling m i
                   , fallto /= Nothing]
   , gWater      = fWater finfo
@@ -98,7 +99,7 @@ falling :: Map -> Pos -> Maybe Pos
 falling m p 
   = if south == Empty 
     then Just sp
-    else if south == Rock
+    else if isRock south
          then if east == Empty && southeast == Empty
               then Just sep
               else if west == Empty && southwest == Empty

@@ -58,15 +58,15 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
                             }
         Razor          -> s'{ gRazors = gRazors s' + 1 }
         OpenLambdaLift -> s'{ gEnd = Just Winning, gScore = gScore s' + gLambda s' * 50 }
-        Rock
-          | x'==x+1 && y'==y &&
+        c
+          | isRock c && x'==x+1 && y'==y &&
             inRange (bounds m) (x+2,y) &&  m ! (x+2,y) == Empty ->
               -- Additionally, the Rock moves to (x+2,y).
-              s'{ gMap = gMap s' // [((x+2,y), Rock)] }
-          | x'==x-1 && y'==y &&
+              s'{ gMap = gMap s' // [((x+2,y), c)] }
+          | isRock c && x'==x-1 && y'==y &&
             inRange (bounds m) (x-2,y) &&  m ! (x-2,y) == Empty ->
               -- Additionally, the Rock moves to (x-2,y).
-              s'{ gMap = gMap s' // [((x-2,y), Rock)] }
+              s'{ gMap = gMap s' // [((x-2,y), c)] }
         Trampoline c   -> s1 { gMap = wm
                              , gPos = to }
                            where

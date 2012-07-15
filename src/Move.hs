@@ -34,12 +34,12 @@ isValidMove m (x,y) (x',y') =
     Lambda         -> True
     OpenLambdaLift -> True
     Razor          -> True
-    Rock
-      | x'==x+1 && y'==y &&
+    c
+      | isRock c && x'==x+1 && y'==y &&
         inRange (bounds m) (x+2,y) &&  m ! (x+2,y) == Empty ->
           True
           -- Additionally, the Rock moves to (x+2,y).
-      | x'==x-1 && y'==y &&
+      | isRock c && x'==x-1 && y'==y &&
         inRange (bounds m) (x-2,y) &&  m ! (x-2,y) == Empty ->
           True
           -- Additionally, the Rock moves to (x−2,y).

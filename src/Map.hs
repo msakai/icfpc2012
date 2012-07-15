@@ -21,6 +21,7 @@ data Cell
   | Target Char
   | Beard
   | Razor
+  | HigherOrderRock
   deriving (Ord, Eq, Show)
 
 cell2Char :: Cell -> Char
@@ -37,6 +38,7 @@ cell2Char cell = case cell of
   Target c         -> c
   Beard            -> 'W'
   Razor            -> '!'
+  HigherOrderRock  -> '@'
 
 showMap :: Map -> String
 showMap = unlines . showMap'
@@ -61,7 +63,11 @@ update m growBeard = if crash m xs then Left (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
     match = all (\(pos,cell) -> getCell m pos == cell)
-    lambdaRemaining = Lambda `elem` elems m
+
+    -- FIXME: マップに残っているラムダを数えるのではなく、
+    -- 最初に存在したラムダを全て回収したかを判定しないといけない
+    lambdaRemaining = or [e == Lambda || e == HigherOrderRock | e <- elems m]
+
     xs = do
       y <- [y1..y2]
       x <- [x1..x2]
@@ -69,13 +75,24 @@ update m growBeard = if crash m xs then Left (m // xs)
       case c of
         Rock
           | match [((x, y-1),Empty)] ->
-              [((x,y), Empty), ((x, y-1), Rock)]
-          | match [((x, y-1),Rock), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), ((x+1, y-1), Rock)]
-          | match [((x, y-1),Rock), ((x-1, y),Empty), ((x-1, y-1),Empty)] ->
-              [((x,y), Empty), ((x-1, y-1), Rock)]
+              [((x,y), Empty), ((x, y-1), c)]
+          | isRock (getCell m (x, y-1)) && match [((x+1, y),Empty), ((x+1, y-1),Empty)] ->
+              [((x,y), Empty), ((x+1, y-1), c)]
+          | isRock (getCell m (x, y-1)) && match [((x-1, y),Empty), ((x-1, y-1),Empty)] ->
+              [((x,y), Empty), ((x-1, y-1), c)]
           | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), ((x+1, y-1), Rock)]
+              [((x,y), Empty), ((x+1, y-1), c)]
+        HigherOrderRock
+          | match [((x, y-1),Empty)] ->
+              [((x,y), Empty), f (x, y-1)]
+          | isRock (getCell m (x, y-1)) && match [((x+1, y),Empty), ((x+1, y-1),Empty)] ->
+              [((x,y), Empty), f (x+1, y-1)]
+          | isRock (getCell m (x, y-1)) && match [((x-1, y),Empty), ((x-1, y-1),Empty)] ->
+              [((x,y), Empty), f (x-1, y-1)]
+          | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
+              [((x,y), Empty), f (x+1, y-1)]
+          where
+            f (x',y') = ((x',y'), if getCell m (x',y'-1) /= Empty then Lambda else c)
         ClosedLambdaLift | not lambdaRemaining -> 
           [((x,y), OpenLambdaLift)]
         Beard | growBeard -> do
@@ -93,10 +110,16 @@ getCell m p
   | inRange (bounds m) p = m ! p
   | otherwise            = Wall
 
+isRock :: Cell -> Bool
+isRock Rock            = True
+isRock HigherOrderRock = True
+isRock _               = False
+
 crash :: Map -> [(Pos,Cell)] -> Bool
 crash _ []     = False
-crash m (((x,y),Rock) : _)
-  | getCell m (x,y-1) == Robot = True
+crash m (((x,y),c) : _)
+  | (c == Rock || c == Lambda) && getCell m (x,y-1) == Robot = True
+    -- ここのLambdaはHigherOrderRockが変化したLambda
 crash m (_:cs) = crash m cs
 
 parseMap :: String -> Map
@@ -122,6 +145,7 @@ parseCell '.'  = Earth
 parseCell ' '  = Empty
 parseCell 'W'  = Beard
 parseCell '!'  = Razor
+parseCell '@'  = HigherOrderRock
 parseCell c 
   | c `elem` "ABCDEFGHI" = Trampoline c
   | c `elem` "123456789" = Target c
