@@ -257,7 +257,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
           case undoBuf of
             [] -> go (s,trace) undoBuf
             _ -> go (last undoBuf) []
-        _ | isNothing (gEnd s) && all (`elem` "LRUDWA") (map toUpper l) -> do
+        _ | isNothing (gEnd s) && all (`elem` "LRUDWAS") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
           go (stepN s cs, trace <> Seq.fromList cs) (curr : undoBuf)
         _ -> do
