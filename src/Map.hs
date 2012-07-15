@@ -18,7 +18,7 @@ data Cell
   | Earth
   | Empty
   | Beard
-  | Razer
+  | Razor
   deriving (Ord, Eq, Show)
 
 update :: Map -> Either Map Map
@@ -90,7 +90,7 @@ parseCell 'O'  = OpenLambdaLift
 parseCell '.'  = Earth
 parseCell ' '  = Empty
 parseCell 'W'  = Beard
-parseCell '!'  = Razer
+parseCell '!'  = Razor
 parseCell _    = error "parseCell: parse error"
 
 showCell :: Cell -> Char
@@ -103,7 +103,7 @@ showCell OpenLambdaLift   = 'O'
 showCell Earth            = '.'
 showCell Empty            = ' '
 showCell Beard            = 'W'
-showCell Razer            = '!'
+showCell Razor            = '!'
 
 
 testParseMap :: Map
