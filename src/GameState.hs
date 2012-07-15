@@ -43,7 +43,7 @@ initialState m meta
   , gLambdaLeft = [ i | (i,Lambda) <- assocs m]
   , gSteps      = 0
   , gEnd        = Nothing
-  , gFallings   = undefined
+  , gFallings   = undefined -- [ i | (i,Rock) <- assocs m, falling i]
   , gWater      = fWater finfo
   , gFlooding   = fFlooding finfo
   , gWaterproof = fWaterproof finfo

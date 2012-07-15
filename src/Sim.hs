@@ -26,83 +26,11 @@ import Data.Monoid
 import qualified Data.Foldable as F
 import qualified Data.Sequence as Seq
 import System.IO
-import Text.Printf
 
 import Map
 import Move
-import Metadata
 import GameState
 
-{--------------------------------------------------------------------
-  GameState
---------------------------------------------------------------------
-
-data GameState
-  = GameState
-  { gPos    :: !Pos -- ^ ロボットの現在位置
-  , gMap    :: !Map -- ^ 地図
-  , gScore  :: !Int -- ^ スコア
-  , gLambda :: !Int -- ^ 獲得したラムダの数
-  , gLambdaLeft :: [Pos]  -- ^ 未回収のラムダの位置のリスト
-  , gSteps  :: !Int -- ^ 実行ステップ数
-  , gEnd    :: Maybe EndingCondition -- ^ 終了条件
-
-  , gWater      :: !Int -- ^ 現在の水位
-  , gFlooding   :: !Int -- ^ 水位上昇ペース
-  , gWaterproof :: !Int -- ^ ロボットが水中にいて大丈夫な時間
-  , gUnderwater :: !Int -- ^ 現在ロボットが水面下にいる継続時間
-
-  , gGrowth     :: !Int -- ^ ヒゲの成長速度
-  , gRazors     :: !Int -- ^ 現在持っているカミソリの個数
-  }
-  deriving (Eq, Show)
-
-initialState :: Map -> [(String, Int)] -> GameState
-initialState m meta
-  = GameState
-  { gPos    = head [i | (i,Robot) <- assocs m]
-  , gMap    = m
-  , gScore  = 0
-  , gLambda = 0
-  , gLambdaLeft = map fst $ filter ((Lambda ==). snd) $ assocs m
-  , gSteps  = 0
-  , gEnd    = Nothing
-
-  , gWater      = water
-  , gFlooding   = flooding
-  , gWaterproof = waterproof
-  , gUnderwater = 0
-
-  , gGrowth      = growth
-  , gRazors      = razors
-  }
-  where
-    water      = fromMaybe 0  $ lookup "Water" meta
-    flooding   = fromMaybe 0  $ lookup "Flooding" meta
-    waterproof = fromMaybe 10 $ lookup "Waterproof" meta
-    growth     = fromMaybe 25 $ lookup "Growth" meta
-    razors     = fromMaybe 0  $ lookup "Razors" meta
-
-initialStateFromString :: String -> GameState
-initialStateFromString s = initialState m meta
-  where
-    ls = lines s
-    (ls1,ls2) = break ([]==) ls
-    m    = parseMap' ls1
-    meta = parseMetadata' ls2
-
-printState :: GameState -> IO ()
-printState s = do
-  putStr $ showMap (gMap s)
-  printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
-  printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
-    (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
-  printf "Growth: %d; Razors: %d\n"
-    (gGrowth s) (gRazors s)
-  case gEnd s of
-    Nothing -> return ()
-    Just w -> printf "End: %s\n" $ show w
--}
 {--------------------------------------------------------------------
   Simulation
 --------------------------------------------------------------------}

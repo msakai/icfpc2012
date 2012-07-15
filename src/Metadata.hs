@@ -57,7 +57,9 @@ parseMetadata = parseMetadata' . lines
 
 parseMetadata' :: [String] -> Metadata
 parseMetadata' [] = defaultMetadata
-parseMetadata' ls = collect . map (mkassoc . words . downcase) $ ls
+parseMetadata' ls = collect 
+                  . map (mkassoc . words . downcase) 
+                  . filter (not . null) $ ls
   where
     downcase = map toLower
 
