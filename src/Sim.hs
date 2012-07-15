@@ -107,7 +107,8 @@ updateMap s = case m2 of
   Left  m' -> s { gMap = m', gEnd = Just Losing }
   Right m' -> s { gMap = m' } 
   where
-    m2 = update (gMap s)
+    m2 = update (gMap s) growBeard
+    growBeard = gGrowth s > 0 && gSteps s `mod` gGrowth s == 0
 
 {-|
 処理順:

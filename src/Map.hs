@@ -55,9 +55,9 @@ slices n = unfoldr phi
     phi [] = Nothing
     phi xs = Just $ splitAt n xs
 
-update :: Map -> Either Map Map
-update m = if crash m xs then Left (m // xs)
-           else Right (m // xs)
+update :: Map -> Bool -> Either Map Map
+update m growBeard = if crash m xs then Left (m // xs)
+                     else Right (m // xs)
   where
     ((x1,y1),(x2,y2)) = bounds m
     match = all (\(pos,cell) -> getCell m pos == cell)
@@ -78,6 +78,14 @@ update m = if crash m xs then Left (m // xs)
               [((x,y), Empty), ((x+1, y-1), Rock)]
         ClosedLambdaLift | not lambdaRemaining -> 
           [((x,y), OpenLambdaLift)]
+        Beard | growBeard -> do
+          dx <- [-1..1]
+          dy <- [-1..1]
+          let x'=x+dx
+              y'=y+dy
+          guard $ (x,y) /= (x',y')
+          guard $ getCell m (x',y') == Empty
+          return ((x',y'), Beard)
         _ -> mzero
 
 getCell :: Map -> Pos -> Cell
@@ -139,7 +147,7 @@ testShowMap = showMap' (parseMap' m) == m
         ]
 
 testUpdate :: Bool
-testUpdate = update (parseMap' m1) == Right (parseMap' m2)
+testUpdate = update (parseMap' m1) False == Right (parseMap' m2) 
   where
     m1 = [ "#* *#"
          , "#* *#"
