@@ -111,10 +111,12 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     R -> f (x+1, y)
     U -> f (x, y+1)
     D -> f (x, y-1)
-    W -> s{ gScore = gScore s - 1, gSteps = gSteps s + 1 }
+    W -> s1
+    S -> s1{ gMap = applyRazor (x,y) m, gRazors = gRazors s - 1 }
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
-    S -> s{ gSteps = gSteps s + 1, gMap = applyRazor (x,y) m, gRazors = gRazors s - 1 }
   where
+    s1 = s{ gSteps = gSteps s + 1, gScore = gScore s - 1 }
+
     f xy@(x',y') = 
       case m ! (x',y') of
         Empty          -> s'
@@ -134,16 +136,12 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
               -- Additionally, the Rock moves to (x-2,y).
               s'{ gMap = gMap s' // [((x-2,y), Rock)] }
         _ -> -- invalid
-          s{ gScore = gScore s - 1
-           , gSteps = gSteps s + 1
-           } 
+          s1
       where
         m' = m // ([((x',y'), Robot) | m ! (x',y') /= OpenLambdaLift] ++ [((x,y), Empty)])
-        s' = s{ gMap = m'
-              , gPos = (x',y')
-              , gScore = gScore s - 1
-              , gSteps = gSteps s + 1
-              }
+        s' = s1{ gMap = m'
+               , gPos = (x',y')
+               }
 
 applyRazor :: Pos -> Map -> Map
 applyRazor (x,y) m = m // xs
