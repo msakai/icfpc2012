@@ -50,11 +50,14 @@ data GameState
   , gFlooding   :: !Int -- ^ 水位上昇ペース
   , gWaterproof :: !Int -- ^ ロボットが水中にいて大丈夫な時間
   , gUnderwater :: !Int -- ^ 現在ロボットが水面下にいる継続時間
+
+  , gGrowth     :: !Int -- ^ ヒゲの成長速度
+  , gRazors     :: !Int -- ^ 現在持っているカミソリの個数
   }
   deriving (Eq, Show)
 
-initialState :: Map -> (Int,Int,Int) -> GameState
-initialState m (water,flooding,waterproof)
+initialState :: Map -> [(String, Int)] -> GameState
+initialState m meta
   = GameState
   { gPos    = head [i | (i,Robot) <- assocs m]
   , gMap    = m
@@ -63,22 +66,29 @@ initialState m (water,flooding,waterproof)
   , gLambdaLeft = map fst $ filter ((Lambda ==). snd) $ assocs m
   , gSteps  = 0
   , gEnd    = Nothing
+
   , gWater      = water
   , gFlooding   = flooding
   , gWaterproof = waterproof
   , gUnderwater = 0
+
+  , gGrowth      = growth
+  , gRazors      = razors
   }
+  where
+    water      = fromMaybe 0  $ lookup "Water" meta
+    flooding   = fromMaybe 0  $ lookup "Flooding" meta
+    waterproof = fromMaybe 10 $ lookup "Waterproof" meta
+    growth     = fromMaybe 25 $ lookup "Growth" meta
+    razors     = fromMaybe 0  $ lookup "Razors" meta
 
 initialStateFromString :: String -> GameState
-initialStateFromString s = initialState m (water, flooding, waterproof)
+initialStateFromString s = initialState m meta
   where
     ls = lines s
     (ls1,ls2) = break ([]==) ls
     m    = parseMap' ls1
     meta = parseMetadata' ls2
-    water      = fromMaybe 0  $ lookup "Water" meta
-    flooding   = fromMaybe 0  $ lookup "Flooding" meta
-    waterproof = fromMaybe 10 $ lookup "Waterproof" meta                  
 
 printState :: GameState -> IO ()
 printState s = do
@@ -103,6 +113,7 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     D -> f (x, y-1)
     W -> s{ gScore = gScore s - 1, gSteps = gSteps s + 1 }
     A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
+    S -> s{ gSteps = gSteps s + 1, gMap = applyRazor (x,y) m, gRazors = gRazors s - 1 }
   where
     f xy@(x',y') = 
       case m ! (x',y') of
@@ -134,11 +145,24 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
               , gSteps = gSteps s + 1
               }
 
+applyRazor :: Pos -> Map -> Map
+applyRazor (x,y) m = m // xs
+  where
+    xs = do
+      dx<-[-1..1]
+      dy<-[-1..1]
+      let x' = x+dx
+          y' = y+dy
+      guard $ (x',y') /= (x,y)
+      guard $ m ! (x',y') == Beard
+      return ((x',y'), Empty)
+
+-- TODO: ヒゲの更新処理
 step :: GameState -> Command -> GameState
 step s cmd
   | isJust (gEnd s)  = s  -- 終了済みなら何もしない (エラーにすべき?)
   | isJust (gEnd s') = s' -- Win/Abortの場合にはその後のmapのupdateとLoosingの判定はしなくて良いようだ
-  | otherwise = updateWater (updateMap s')
+  | otherwise = updateWater $ updateMap s'
   where
     s' = move cmd s
 

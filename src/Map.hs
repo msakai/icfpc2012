@@ -17,6 +17,8 @@ data Cell
   | OpenLambdaLift
   | Earth
   | Empty
+  | Beard
+  | Razer
   deriving (Ord, Eq, Show)
 
 update :: Map -> Either Map Map
@@ -87,6 +89,8 @@ parseCell 'L'  = ClosedLambdaLift
 parseCell 'O'  = OpenLambdaLift
 parseCell '.'  = Earth
 parseCell ' '  = Empty
+parseCell 'W'  = Beard
+parseCell '!'  = Razer
 parseCell _    = error "parseCell: parse error"
 
 showCell :: Cell -> Char
@@ -98,6 +102,9 @@ showCell ClosedLambdaLift = 'L'
 showCell OpenLambdaLift   = 'O'
 showCell Earth            = '.'
 showCell Empty            = ' '
+showCell Beard            = 'W'
+showCell Razer            = '!'
+
 
 testParseMap :: Map
 testParseMap = parseMap' m
@@ -126,24 +133,3 @@ testUpdate = update (parseMap' m1) == Right (parseMap' m2)
          , "#***#"
          , "#####"
          ]
-
-contest1 :: Map
-contest1 =  parseMap'
-  [ "######"
-  , "#. *R#"
-  , "#  \\.#"
-  , "#\\ * #"
-  , "L  .\\#"
-  , "######"
-  ]
-
-contest2 :: Map
-contest2 = parseMap'
-  [ "#######"
-  , "#..***#"
-  , "#..\\\\\\#"
-  , "#...**#"
-  , "#.*.*\\#"
-  , "LR....#"
-  , "#######"
-  ]

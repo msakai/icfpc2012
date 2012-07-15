@@ -24,7 +24,7 @@ parseMetadata' ls = do
     _ -> mzero
 
 keys :: [String]
-keys = ["Water", "Flooding", "Waterproof"]
+keys = ["Water", "Flooding", "Waterproof", "Growth", "Razors"]
 
 sampleMetadata =
   parseMetadata "Water 0\nFlooding 10\nWaterproof 5\n"

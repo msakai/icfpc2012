@@ -11,6 +11,7 @@ data Command
   | D
   | W
   | A
+  | S
   deriving (Ord, Eq, Show, Read, Bounded, Enum)
 
 parseCommands :: String -> [Command]

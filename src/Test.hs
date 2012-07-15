@@ -17,7 +17,7 @@ case_contest1_map = do
   gScore s @?= 210
   where
     act = parseCommands "DLLLDDRRRLULLDL"
-    s0  = initialState contest1 (0,0,10)
+    s0  = initialStateFromString contest1
     s   = stepN s0 act
 
 case_contest1_map_losing = do
@@ -25,16 +25,35 @@ case_contest1_map_losing = do
   gScore s @?= -2
   where
     act = parseCommands "DD"
-    s0  = initialState contest1 (0,0,10)
+    s0  = initialStateFromString contest1
     s   = stepN s0 act
+
+contest1 =  unlines
+  [ "######"
+  , "#. *R#"
+  , "#  \\.#"
+  , "#\\ * #"
+  , "L  .\\#"
+  , "######"
+  ]
 
 case_contest2_map = do
   gEnd s   @?= Just Winning
   gScore s @?= 281
   where
     act = parseCommands "RRUDRRULURULLLLDDDL"
-    s0  = initialState contest2 (0,0,10)
+    s0  = initialStateFromString contest2
     s   = stepN s0 act
+
+contest2 = unlines
+  [ "#######"
+  , "#..***#"
+  , "#..\\\\\\#"
+  , "#...**#"
+  , "#.*.*\\#"
+  , "LR....#"
+  , "#######"
+  ]
 
 case_contest3_map = do
   gEnd s   @?= Just Winning

@@ -31,6 +31,6 @@ run check s0 = forever $ walk s0 []
 
 randomCommand :: IO Command
 randomCommand = do
-  let cmds = [L,R,U,D,W] -- Aは無条件にチェックするのでここで候補にはしない
+  let cmds = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
   i <- Rand.getStdRandom $ Rand.randomR (0, length cmds - 1)
   return $ cmds !! i
