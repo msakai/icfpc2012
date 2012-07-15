@@ -2,8 +2,12 @@
 module Map where
 
 import Control.Monad
+import Control.Monad.ST
 import Data.Array
+import Data.Array.ST hiding (unsafeFreeze)
+import Data.Array.Unsafe
 import Data.List
+import Data.STRef
 
 type Map = Array Pos Cell
 type Pos = (Int,Int)
@@ -58,52 +62,60 @@ slices n = unfoldr phi
     phi xs = Just $ splitAt n xs
 
 update :: Map -> Bool -> Either Map Map
-update m growBeard = if crash m xs then Left (m // xs)
-                     else Right (m // xs)
+update m growBeard = runST $ do
+  result <- thaw m
+  crashRef <- newSTRef False
+  updateST m growBeard crashRef result
+  crash <- readSTRef crashRef
+  m' <- unsafeFreeze result
+  return $!
+    if crash
+    then Left m'
+    else Right m'
+
+updateST :: Map -> Bool -> STRef s Bool -> STArray s Pos Cell -> ST s ()
+updateST m growBeard crash result = sequence_ [updatePos x y | x <- [x1..x2], y <- [y1..y2]]
   where
     ((x1,y1),(x2,y2)) = bounds m
     match = all (\(pos,cell) -> getCell m pos == cell)
 
-    -- FIXME: マップに残っているラムダを数えるのではなく、
-    -- 最初に存在したラムダを全て回収したかを判定しないといけない
-    lambdaRemaining = or [e == Lambda || e == HigherOrderRock | e <- elems m]
-
-    xs = do
-      y <- [y1..y2]
-      x <- [x1..x2]
+    updatePos x y = do
       let c = m ! (x,y)
       case c of
-        Rock
-          | match [((x, y-1),Empty)] ->
-              [((x,y), Empty), ((x, y-1), c)]
-          | isRock (getCell m (x, y-1)) && match [((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), ((x+1, y-1), c)]
-          | isRock (getCell m (x, y-1)) && match [((x-1, y),Empty), ((x-1, y-1),Empty)] ->
-              [((x,y), Empty), ((x-1, y-1), c)]
-          | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), ((x+1, y-1), c)]
-        HigherOrderRock
-          | match [((x, y-1),Empty)] ->
-              [((x,y), Empty), f (x, y-1)]
-          | isRock (getCell m (x, y-1)) && match [((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), f (x+1, y-1)]
-          | isRock (getCell m (x, y-1)) && match [((x-1, y),Empty), ((x-1, y-1),Empty)] ->
-              [((x,y), Empty), f (x-1, y-1)]
-          | match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] ->
-              [((x,y), Empty), f (x+1, y-1)]
+        _ | isRock c && match [((x, y-1),Empty)] -> do
+              clearXY
+              f (x, y-1)
+          | isRock c && isRock (getCell m (x, y-1)) && match [((x+1, y),Empty), ((x+1, y-1),Empty)] -> do
+              clearXY
+              f (x+1, y-1)
+          | isRock c && isRock (getCell m (x, y-1)) && match [((x-1, y),Empty), ((x-1, y-1),Empty)] -> do
+             clearXY
+             f (x-1, y-1)
+          | isRock c && match [((x, y-1),Lambda), ((x+1, y),Empty), ((x+1, y-1),Empty)] -> do
+              clearXY
+              f (x+1, y-1)
           where
-            f (x',y') = ((x',y'), if getCell m (x',y'-1) /= Empty then Lambda else c)
+            clearXY = writeArray result (x,y) Empty
+            f (x',y') = do
+              let below = getCell m (x',y'-1)
+                  c' = if c == HigherOrderRock && below /= Empty then Lambda else c
+              when (below == Robot) $ writeSTRef crash True
+              writeArray result (x',y') c'
         ClosedLambdaLift | not lambdaRemaining -> 
-          [((x,y), OpenLambdaLift)]
-        Beard | growBeard -> do
+          writeArray result (x,y) OpenLambdaLift
+        Beard | growBeard -> sequence_ $ do
           dx <- [-1..1]
           dy <- [-1..1]
           let x'=x+dx
               y'=y+dy
           guard $ (x,y) /= (x',y')
           guard $ getCell m (x',y') == Empty
-          return ((x',y'), Beard)
-        _ -> mzero
+          return $ writeArray result (x',y') Beard
+        _ -> return ()
+
+    -- FIXME: マップに残っているラムダを数えるのではなく、
+    -- 最初に存在したラムダを全て回収したかを判定しないといけない
+    lambdaRemaining = or [e == Lambda || e == HigherOrderRock | e <- elems m]
 
 getCell :: Map -> Pos -> Cell
 getCell m p
@@ -114,13 +126,6 @@ isRock :: Cell -> Bool
 isRock Rock            = True
 isRock HigherOrderRock = True
 isRock _               = False
-
-crash :: Map -> [(Pos,Cell)] -> Bool
-crash _ []     = False
-crash m (((x,y),c) : _)
-  | (c == Rock || c == Lambda) && getCell m (x,y-1) == Robot = True
-    -- ここのLambdaはHigherOrderRockが変化したLambda
-crash m (_:cs) = crash m cs
 
 parseMap :: String -> Map
 parseMap = parseMap' . lines
