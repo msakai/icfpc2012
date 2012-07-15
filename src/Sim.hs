@@ -67,14 +67,15 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
             inRange (bounds m) (x-2,y) &&  m ! (x-2,y) == Empty ->
               -- Additionally, the Rock moves to (x-2,y).
               s'{ gMap = gMap s' // [((x-2,y), Rock)] }
-        Trampoline c   -> s1 { gMap = wm }
+        Trampoline c   -> s1 { gMap = wm
+                             , gPos = to }
                            where
-                             to = fromJust $ gTrampoline s ! c
+                             to = fromJust $ lookup c $ gTrampoline s
                              Target c' = getCell m to
-                             froms = gTarget s ! c'
+                             froms = fromJust $ lookup c' $ gTarget s 
                              wm = (m //) $ (to,Robot) : zip froms (repeat Empty)
-        _ -> -- invalid
-          s1
+        _ -> s1 -- invalid case
+
       where
         m' = m // ([((x',y'), Robot) | m ! (x',y') /= OpenLambdaLift] ++ [((x,y), Empty)])
         s' = s1{ gMap = m'

@@ -2,11 +2,15 @@ module GameState where
 
 import Data.Array
 import Data.Maybe
+import Data.List
+import Data.Ord
 import Text.Printf
 
 import Map
 import Metadata
 import Move (EndingCondition)
+
+import Debug.Trace
 
 data GameState
  = GameState
@@ -24,8 +28,8 @@ data GameState
  , gFlooding   :: !Int                   -- ^ 水位上昇ペース                  
  , gWaterproof :: !Int                   -- ^ ロボットが水中にいて大丈夫な時間
  , gUnderwater :: !Int                   -- ^ 現在ロボットが水面下にいる継続時間
- , gTrampoline :: Array Char (Maybe Pos) -- ^ トランポリン（ターゲット位置）
- , gTarget     :: Array Char [Pos]       -- ^ ターゲット（トランポリン位置）
+ , gTrampoline :: [(Char, Pos)]          -- ^ トランポリン（ターゲット位置）
+ , gTarget     :: [(Char, [Pos])]        -- ^ ターゲット（トランポリン位置）
  , gGrowth     :: !Int                   -- ^ 髭の成長率
  , gBreard     :: [Pos]                  -- ^ 髭の位置
  , gRazors     :: !Int                   -- ^ ロボットが持つ剃刀の数
@@ -35,7 +39,6 @@ data GameState
 printState :: GameState -> IO ()
 printState s = do
   putStr $ showMap (gMap s)
-  printf "Robot: %s\n" (show (gPos s))
   printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
   printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
     (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
@@ -63,8 +66,10 @@ initialState m meta
   , gFlooding   = fFlooding finfo
   , gWaterproof = fWaterproof finfo
   , gUnderwater = 0
-  , gTrampoline = listArray ('A','I') (map tg trng)
-  , gTarget     = listArray ('1','9') (map tp frng)
+  , gTrampoline = map (\(f,t) -> (f,fromJust $ lookup t topos)) ftassc
+  , gTarget     = map gather 
+                $ groupBy (\ x y -> fst x == fst y)
+                $ sort [ (t,f) | (f,t) <- ftassc ]
   , gGrowth     = grGrowth ginfo
   , gBreard     = [ i | (i,Beard) <- assocs m ]
   , gRazors     = grRazors ginfo
@@ -74,12 +79,10 @@ initialState m meta
     finfo = metaFloodingInfo meta
     ginfo = metaGrowthInfo meta
     tinfo = metaTrampolineInfo meta
-    tarr  = tTrampoline tinfo
-    topos = [ (c,pos) | (pos,Target c) <- assocs m ] 
-    tg f = tarr ! f >>= \ t -> lookup t topos
-    trng = range ('A','I')
-    tp t = lookfor t topos
-    frng = range ('1','9')
+    ftassc= tTrampoline tinfo
+    topos = [ (c,pos) | (pos,Target c) <- assocs m ]
+    frpos = [ (c,pos) | (pos,Trampoline c) <- assocs m ]
+    gather a@((t,_):_) = (t,concatMap (\ (_,s) -> lookfor s frpos) a)
 
 initialStateFromString :: String -> GameState
 initialStateFromString s = initialState m meta

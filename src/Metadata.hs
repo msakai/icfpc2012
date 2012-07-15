@@ -1,6 +1,5 @@
 module Metadata where
 
-import Data.Array
 import Data.Char
 
 data Metadata
@@ -32,14 +31,12 @@ defaultFloodingInfo = FloodingInfo { fWater      = 0
 
 data TrampolineInfo
  = TrampolineInfo
- { tTrampoline :: Array Char (Maybe Char) -- ^ トランポリン -> ターゲット
+ { tTrampoline :: [(Char,Char)] -- ^ トランポリン -> ターゲット
  }
    deriving (Show)
 
 defaultTrampolineInfo :: TrampolineInfo
-defaultTrampolineInfo = TrampolineInfo { tTrampoline = array rng ts }
-  where rng  = ('A','I')
-        ts   = zip (range rng) (repeat Nothing)
+defaultTrampolineInfo = TrampolineInfo { tTrampoline = [] }
 
 data GrowthInfo
  = GrowthInfo
@@ -90,7 +87,7 @@ collect s = Metadata
      w = parseWater (lookfor "water" s)
      f = parseFlooding (lookfor "flooding" s)
      p = parseWarterProof (lookfor "waterproof" s)
-     t = parseTrampoline (filter ((=="trampoline").fst) s)
+     t = parseTrampoline (filter ((1==).length.fst) s)
      g = parseGrowth (lookfor "growth" s)
      r = parseRazors (lookfor "razors" s)
 
@@ -108,17 +105,16 @@ parseFlooding :: [String] -> Int
 parseFlooding []    = fFlooding defaultFloodingInfo
 parseFlooding (x:_) = read x
 
-
 parseWarterProof :: [String] -> Int
 parseWarterProof []    = fWaterproof defaultFloodingInfo
 parseWarterProof (x:_) = read x
 
-parseTrampoline :: [(String,String)] -> Array Char (Maybe Char)
+parseTrampoline :: [(String,String)] -> [(Char, Char)]
 parseTrampoline [] = tTrampoline defaultTrampolineInfo
-parseTrampoline xs = tTrampoline defaultTrampolineInfo // map (cross (f,g)) xs
+parseTrampoline xs = map (cross (f,g)) xs
   where
-    f = head
-    g = Just . head
+    f = toUpper . head
+    g = head
 
 cross :: (a->c,b->d) -> (a,b) -> (c,d)
 cross (f,g) (x,y) = (f x,g y)
