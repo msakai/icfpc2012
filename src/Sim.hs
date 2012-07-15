@@ -73,7 +73,9 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
                              to = fromJust $ lookup c $ gTrampoline s
                              Target c' = getCell m to
                              froms = fromJust $ lookup c' $ gTarget s 
-                             wm = (m //) $ (to,Robot) : zip froms (repeat Empty)
+                             wm = (m //) $ ((x,y),Empty) 
+                                         : (to,Robot) 
+                                         : zip froms (repeat Empty)
         _ -> s1 -- invalid case
 
       where
