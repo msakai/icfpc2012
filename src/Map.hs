@@ -43,7 +43,7 @@ showMap = unlines . showMap'
 
 showMap' :: Map -> [String]
 showMap' mp
- = transpose $ reverse 
+ = reverse   $ transpose
              $ slices m 
              $ map cell2Char 
              $ elems mp

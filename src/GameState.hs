@@ -35,6 +35,7 @@ data GameState
 printState :: GameState -> IO ()
 printState s = do
   putStr $ showMap (gMap s)
+  printf "Robot: %s\n" (show (gPos s))
   printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
   printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
     (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
