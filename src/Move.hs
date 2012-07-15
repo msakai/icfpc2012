@@ -33,6 +33,7 @@ isValidMove m (x,y) (x',y') =
     Earth          -> True
     Lambda         -> True
     OpenLambdaLift -> True
+    Razor          -> True
     Rock
       | x'==x+1 && y'==y &&
         inRange (bounds m) (x+2,y) &&  m ! (x+2,y) == Empty ->

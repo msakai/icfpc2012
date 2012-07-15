@@ -39,6 +39,8 @@ printState s = do
   printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
   printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
     (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
+  printf "Growth: %d; Razors: %d\n"
+    (gGrowth s) (gRazors s)
   case gEnd s of
     Nothing -> return ()
     Just w -> printf "End: %s\n" $ show w
