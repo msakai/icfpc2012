@@ -28,7 +28,7 @@ run check s0 = forever $ walk s0 []
             else do
               let cs = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
                   children = [(step s c, c:cmds) | c <- cs, isMeaningfulCommand s c]
-              forM_ children $ \(s,cmds) -> check s (A:cmds)
+              forM_ children $ \(s,cmds) -> check (step s A) (A:cmds)
               unless (null children) $ do
                 i <- Rand.getStdRandom $ Rand.randomR (0, length children - 1)
                 uncurry walk (children !! i)
