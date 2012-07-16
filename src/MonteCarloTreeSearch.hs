@@ -56,7 +56,23 @@ expand n = do
 run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
 run check s0 = do
   root <- newNode s0 []
-  go root root
+
+  forM_ (iterate (*2) 1000) $ \lim -> do
+    let loop nd = do
+          t <- readIORef (ndTrial nd)
+          if t < lim
+            then walk nd [] >> loop nd
+            else do
+              cs <- expand nd
+              if null cs
+                then return ()
+                else do
+                  xs <- forM cs $ \(_, nd2) -> do
+                    best <- readIORef (ndBestScore nd2)
+                    return (nd2,best)
+                  let nd2 = fst $ maximumBy (comparing snd) xs
+                  loop nd2
+    loop root
 
   where
     check' :: Tree -> [Tree] -> IO ()
@@ -92,19 +108,3 @@ run check s0 = do
       when (len > 0) $ do
         i <- Rand.getStdRandom $ Rand.randomR (0, len - 1)
         walk (snd (cs !! i)) (nd : ancestors)
-
-    go root nd = do
-      t <- readIORef (ndTrial nd)
-      if t < 2000
-        then walk nd [] >> go root nd
-        else do
-          cs <- expand nd
-          if null cs
-            then do
-              go root root
-            else do
-              xs <- forM cs $ \(_, nd2) -> do
-                best <- readIORef (ndBestScore nd2)
-                return (nd2,best)
-              let nd2 = fst $ maximumBy (comparing snd) xs
-              go root nd2
