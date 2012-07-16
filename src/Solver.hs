@@ -14,6 +14,7 @@ import Sim
 import qualified RandomWalk
 import qualified BFS
 import qualified DFSGreedy
+import qualified MonteCarloTreeSearch
 
 import Debug.Trace
 
@@ -51,6 +52,7 @@ selectAlgorithm = do
       "random" -> trace "random-walk" RandomWalk.run
       "bfs"    -> trace "bfs" BFS.run
       "dfs-gr" -> trace "dfs-greedy" DFSGreedy.run
+      "montec" -> trace "montecarlo" MonteCarloTreeSearch.run
       _        -> trace prog RandomWalk.run
   }
 
