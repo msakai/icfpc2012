@@ -24,21 +24,21 @@ Flag Static
   Default: False
 
 Library
-  Build-Depends:      base >=4 && <5, array, containers
+  Build-Depends:      base >=4 && <5, array, containers, random
   Hs-Source-Dirs:     src
-  Exposed-Modules:    Map, Move, Sim
+  Exposed-Modules:    GameState, Map, Metadata, Move, RandomWalk, Sim, Solver
 
 Executable sim
   Main-is:            SimMain.hs
   HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers
-  Other-Modules:      Map, Move, Sim
+  Build-Depends:      base >=4 && <5, array, containers, random
+  Other-Modules:      GameState, Map, Metadata, Move, RandomWalk, Sim, Solver
 
 Executable lifter
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      Map, Move, Sim, Solver, RandomWalk
+  Other-Modules:      GameState, Map, Metadata, Move, RandomWalk, Sim, Solver
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
@@ -46,5 +46,5 @@ Test-suite Test
   Type:              exitcode-stdio-1.0
   HS-Source-Dirs:    src
   Main-is:           Test.hs
-  Build-depends:     base >=4 && <5, array, containers, test-framework, test-framework-th, test-framework-hunit, HUnit
+  Build-depends:     base >=4 && <5, array, containers, random, test-framework, test-framework-th, test-framework-hunit, HUnit
   Extensions: TemplateHaskell
