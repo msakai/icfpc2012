@@ -53,7 +53,7 @@ selectAlgorithm = do
       "bfs"    -> trace "bfs" BFS.run
       "dfs-gr" -> trace "dfs-greedy" DFSGreedy.run
       "montec" -> trace "montecarlo" MonteCarloTreeSearch.run
-      _        -> trace prog RandomWalk.run
+      _        -> trace prog MonteCarloTreeSearch.run
   }
 
 downcase :: String -> String
