@@ -199,6 +199,42 @@ trampoline1 = unlines
   , "Trampoline C targets 2"
   ]
 
+case_razor = do
+  gMap s @?= m
+  gScore s @?= 34
+  where
+    act = parseCommands "RRLDLLDURRRDDDWSA"
+    s0  = initialStateFromString beard1 
+    s   = stepN s0 act
+    m   = parseMap'
+      [ "##########"
+      , "#*   \\\\\\\\#"
+      , "#.       #"
+      , "#    ..*\\#"
+      , "#  * ..*!#"
+      , "####   # #"
+      , "#\\\\.R. # L"
+      , "#\\\\. ... #"
+      , "#\\\\.WW   #"
+      , "##########"
+      ]
+
+beard1 = unlines 
+  [ "##########"
+  , "#**  \\\\\\\\#"
+  , "#.R..    #"
+  , "# \\  ..*\\#"
+  , "#!   ..*!#"
+  , "####   # #"
+  , "#\\\\... # L"
+  , "#\\\\.W... #"
+  , "#\\\\.     #"
+  , "##########"
+  , ""
+  , "Growth 15"
+  , "Razors 0"
+  ]
+
 case_example = do
   gEnd s   @?= Just Winning
   where
