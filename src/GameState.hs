@@ -56,7 +56,7 @@ initialState m meta
   , gFlooding   = fFlooding finfo
   , gWaterproof = fWaterproof finfo
   , gUnderwater = 0
---  , gTrampInfo  = tTrampoline tinfo
+  , gTrampInfo  = tTrampoline tinfo
   , gTrampoline = map (\(f,t) -> (f,fromJust $ lookup t topos)) ftassc
   , gTarget     = map gather 
                 $ groupBy (\ x y -> fst x == fst y)
