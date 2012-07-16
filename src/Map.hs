@@ -155,6 +155,10 @@ parseCell c    = error ("parseCell: parse error: " ++ show c)
 showCell :: Cell -> Char
 showCell = cell2Char
 
+-- | Manhattan distance
+manhattan :: Pos -> Pos -> Int
+manhattan (x1,y1) (x2,y2) = abs (x2-x1) + abs (y2-y1)
+
 testParseMap :: Map
 testParseMap = parseMap' m
   where
