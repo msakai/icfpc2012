@@ -25,6 +25,7 @@ data GameState
  , gFlooding   :: !Int                   -- ^ 水位上昇ペース                  
  , gWaterproof :: !Int                   -- ^ ロボットが水中にいて大丈夫な時間
  , gUnderwater :: !Int                   -- ^ 現在ロボットが水面下にいる継続時間
+ , gTrampInfo  :: [String]               -- ^ トランポリン情報（表示専用）
  , gTrampoline :: [(Char, Pos)]          -- ^ トランポリン（ターゲット位置）
  , gTarget     :: [(Char, [Pos])]        -- ^ ターゲット（トランポリン位置）
  , gGrowth     :: !Int                   -- ^ 髭の成長率
@@ -32,19 +33,7 @@ data GameState
  , gRazors     :: !Int                   -- ^ ロボットが持つ剃刀の数
  }
  deriving (Eq, Show)
-{-
-printState :: GameState -> IO ()
-printState s = do
-  putStr $ showMap (gMap s)
-  printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
-  printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
-    (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
-  printf "Growth: %d; Razors: %d\n"
-    (gGrowth s) (gRazors s)
-  case gEnd s of
-    Nothing -> return ()
-    Just w -> printf "End: %s\n" $ show w
--}
+
 initialState :: Map -> Metadata -> GameState
 initialState m meta
   = GameState
@@ -67,6 +56,7 @@ initialState m meta
   , gFlooding   = fFlooding finfo
   , gWaterproof = fWaterproof finfo
   , gUnderwater = 0
+  , gTrampInfo  = map trampStr (tTrampoline tinfo)
   , gTrampoline = map (\(f,t) -> (f,fromJust $ lookup t topos)) ftassc
   , gTarget     = map gather 
                 $ groupBy (\ x y -> fst x == fst y)
@@ -84,42 +74,7 @@ initialState m meta
     topos = [ (c,pos) | (pos,Target c) <- assocs m ]
     frpos = [ (c,pos) | (pos,Trampoline c) <- assocs m ]
     gather a@((t,_):_) = (t,concatMap (\ (_,s) -> lookfor s frpos) a)
-{-
-printStateAnsi :: (Int,Int) -> GameState -> IO ()
-printStateAnsi (i,j) s = do
-  setCursorPosition i 0
-  clearFromCursorToScreenEnd
-  setCursorPosition i j
-  let { lls = showMap' (gMap s)
-      ; u   = gHeight s - gWater s
-      ; v   = max 0 u
-      ; (a,b) = splitAt v lls
-      ; wd  = gWidth s
-      }
-  printOutOfWater j wd a
-  setSGR water
-  printUnderWater j wd b
-  setSGR []
-  printf "Steps: %d; Score: %d; Lambda: %d\n" (gSteps s) (gScore s) (gLambda s)
-  printf "Water: %d; Flooding: %d; Waterproof: %d; Underwater: %d\n"
-    (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
-  printf "Growth: %d; Razors: %d\n"
-    (gGrowth s) (gRazors s)
-  case gEnd s of
-    Nothing -> return ()
-    Just w -> printf "End: %s\n" $ show w
-  where
-    water = [SetColor Background Dull Blue, SetColor Foreground Vivid Yellow]
-
-
-printOutOfWater, printUnderWater :: Int -> Int -> [String] -> IO ()
-printOutOfWater i w = mapM_ (out w i)
-printUnderWater i w = mapM_ (out w i)
-
-out :: Int -> Int -> String -> IO ()
-out w i s = setCursorColumn i >> putStr s' >> cursorDownLine 1
-  where s' = take w (s ++ repeat ' ')
--}
+    trampStr (f,t) = "Tramoline: " ++  f:" -> "++[t]
 
 initialStateFromString :: String -> GameState
 initialStateFromString s = initialState m meta

@@ -39,6 +39,7 @@ printStateAnsi (i,j) s = do
     (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
   printf "Growth: %d; Razors: %d\n"
     (gGrowth s) (gRazors s)
+  putStr $ unlines $ gTrampInfo s
   case gEnd s of
     Nothing -> return ()
     Just w -> printf "End: %s\n" $ show w
