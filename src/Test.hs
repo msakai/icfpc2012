@@ -186,6 +186,21 @@ case_cannot_move_onto_target = do
     s0  = initialStateFromString trampoline1
     s1  = stepN s0 act
 
+case_all_Trampolines_with_the_same_Target_are_removed = do
+  gMap s1 @?= m
+  where
+    act = parseCommands "DLL"
+    s0  = initialStateFromString trampoline1
+    s1  = stepN s0 act
+    m   = parseMap'
+      [ "############     "
+      , "#.. . .. ..#     "
+      , "#..*  ..*..######"
+      , "#....2.. ..#\\\\\\C#"  -- web validator では何故かCがTに、2がtになってる
+      , "#......* *.#\\\\\\R#"
+      , "########L########"
+      ]
+
 trampoline1 = unlines
   [ "############"
   , "#..*.R..*..#"
