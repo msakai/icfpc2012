@@ -38,7 +38,7 @@ Executable lifter
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy
+  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
@@ -46,7 +46,7 @@ Executable random-walk
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy
+  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
@@ -54,7 +54,7 @@ Executable bfs
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy
+  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
@@ -62,7 +62,15 @@ Executable dfs-greedy
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy
+  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
+  if flag(Static) && impl(ghc)
+    GHC-Options: -static -optl-static -optl-pthread
+
+Executable montecarlo
+  Main-is:            LifterMain.hs
+  HS-Source-Dirs:     src
+  Build-Depends:      base >=4 && <5, array, containers, random
+  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
