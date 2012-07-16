@@ -10,6 +10,7 @@ import System.IO
 import Move
 import Sim
 import qualified RandomWalk
+import qualified BFS
 
 run :: GameState -> IO ([Command], Int)
 run s0 = do
@@ -25,6 +26,8 @@ run s0 = do
           writeIORef bestRef (cmds, score)
 
   result <- try $ RandomWalk.run check s0
+--  result <- try $ BFS.run check s0
+
   -- XXX
   case result of
     Right () -> return ()
