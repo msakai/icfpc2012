@@ -33,6 +33,7 @@ isValidMove m (x,y) (x',y') =
     Earth          -> True
     Lambda         -> True
     OpenLambdaLift -> True
+    Trampoline _   -> True
     Razor          -> True
     c
       | isRock c && x'==x+1 && y'==y &&
