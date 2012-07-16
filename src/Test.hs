@@ -235,6 +235,46 @@ beard1 = unlines
   , "Razors 0"
   ]
 
+case_horock = do
+  gEnd s @?= Just Losing
+  gMap s @?= m
+  gScore s @?= 19
+  where
+    act = parseCommands "RRDDDD"
+    s0  = initialStateFromString horock1
+    s   = stepN s0 act
+    m   = parseMap'
+      [ "#####L######"
+      , "#....   ..A#"    -- web validator だと A が何故か T になる
+      , "#...... ...#"
+      , "#\\.  #   ..#"
+      , "#\\...#*\\ ###"
+      , "#\\.....R...#"
+      , "#\\..*.@....#"
+      , "####@@.  ..#"
+      , "#....#.. ###"
+      , "#....#..**.#"
+      , "#.1..#  .\\\\#"  -- web validator だと 1 が何故か t になる
+      , "############"
+      ]
+
+horock1 = unlines
+  [ "#####L######"
+  , "#....R....A#"
+  , "#..........#"
+  , "#\\.  #@\\ ..#"
+  , "#\\...#*  ###"
+  , "#\\.........#"
+  , "#\\..*.@....#"
+  , "####@@.  ..#"
+  , "#....#.. ###"
+  , "#....#..**.#"
+  , "#.1..#  .\\\\#"
+  , "############"
+  , ""
+  , "Trampoline A targets 1"
+  ]
+
 case_example = do
   gEnd s   @?= Just Winning
   where
