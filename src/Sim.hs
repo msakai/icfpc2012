@@ -110,8 +110,9 @@ updateMap s = case m2 of
   Left  m' -> s { gMap = m', gEnd = Just Losing }
   Right m' -> s { gMap = m' } 
   where
-    m2 = update (gMap s) growBeard
+    m2 = update (gMap s) lambdaRemaining growBeard
     growBeard = gGrowth s > 0 && gSteps s `mod` gGrowth s == 0
+    lambdaRemaining = gReqLambda s > gLambda s
 
 {-|
 処理順:

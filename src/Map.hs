@@ -61,11 +61,11 @@ slices n = unfoldr phi
     phi [] = Nothing
     phi xs = Just $ splitAt n xs
 
-update :: Map -> Bool -> Either Map Map
-update m growBeard = runST $ do
+update :: Map -> Bool -> Bool -> Either Map Map
+update m lambdaRemaining growBeard = runST $ do
   result <- thaw m
   crashRef <- newSTRef False
-  updateST m growBeard crashRef result
+  updateST m lambdaRemaining growBeard crashRef result
   crash <- readSTRef crashRef
   m' <- unsafeFreeze result
   return $!
@@ -73,8 +73,8 @@ update m growBeard = runST $ do
     then Left m'
     else Right m'
 
-updateST :: Map -> Bool -> STRef s Bool -> STArray s Pos Cell -> ST s ()
-updateST m growBeard crash result = sequence_ [updatePos x y | x <- [x1..x2], y <- [y1..y2]]
+updateST :: Map -> Bool -> Bool -> STRef s Bool -> STArray s Pos Cell -> ST s ()
+updateST m lambdaRemaining growBeard crash result = sequence_ [updatePos x y | x <- [x1..x2], y <- [y1..y2]]
   where
     ((x1,y1),(x2,y2)) = bounds m
     match = all (\(pos,cell) -> getCell m pos == cell)
@@ -112,10 +112,6 @@ updateST m growBeard crash result = sequence_ [updatePos x y | x <- [x1..x2], y 
           guard $ getCell m (x',y') == Empty
           return $ writeArray result (x',y') Beard
         _ -> return ()
-
-    -- FIXME: マップに残っているラムダを数えるのではなく、
-    -- 最初に存在したラムダを全て回収したかを判定しないといけない
-    lambdaRemaining = or [e == Lambda || e == HigherOrderRock | e <- elems m]
 
 getCell :: Map -> Pos -> Cell
 getCell m p
@@ -176,7 +172,7 @@ testShowMap = showMap' (parseMap' m) == m
         ]
 
 testUpdate :: Bool
-testUpdate = update (parseMap' m1) False == Right (parseMap' m2) 
+testUpdate = update (parseMap' m1) False False == Right (parseMap' m2) 
   where
     m1 = [ "#* *#"
          , "#* *#"

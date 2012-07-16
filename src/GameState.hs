@@ -20,6 +20,7 @@ data GameState
  , gPos        :: !Pos                   -- ^ ロボットの現在位置
  , gScore      :: !Int                   -- ^ スコア
  , gLambda     :: !Int                   -- ^ 獲得したラムダの数
+ , gReqLambda  :: !Int                   -- ^ クリアに必要なラムダの数
  , gLambdaLeft :: [Pos]                  -- ^ 未回収のラムダの位置のリスト
  , gSteps      :: !Int                   -- ^ 実行ステップ数
  , gEnd        :: Maybe EndingCondition  -- ^ 終了条件
@@ -57,6 +58,7 @@ initialState m meta
   , gPos    = head [ i | (i,Robot) <- assocs m]
   , gScore  = 0
   , gLambda = 0
+  , gReqLambda  = length [() | Lambda <- elems m] + length [() | HigherOrderRock <- elems m]
   , gLambdaLeft = [ i | (i,Lambda) <- assocs m]
   , gSteps      = 0
   , gEnd        = Nothing
