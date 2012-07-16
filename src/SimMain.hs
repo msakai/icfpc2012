@@ -8,6 +8,7 @@ import System.IO
 import Map
 import Move
 import Sim
+import Interactive
 import Metadata
 
 main :: IO ()

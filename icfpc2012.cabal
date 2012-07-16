@@ -30,7 +30,7 @@ Library
 Executable sim
   Main-is:            SimMain.hs
   HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers
+  Build-Depends:      base >=4 && <5, array, containers, ansi-terminal
   Other-Modules:      Map, Move, Sim
 
 Executable lifter
