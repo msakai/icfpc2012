@@ -50,7 +50,7 @@ Executable random-walk
   if flag(Static) && impl(ghc)
     GHC-Options: -static -optl-static -optl-pthread
 
-Executable dfs
+Executable bfs
   Main-is:            LifterMain.hs
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
