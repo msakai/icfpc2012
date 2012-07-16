@@ -104,7 +104,11 @@ run check s0 = do
           nd2:_ -> check' nd2 (nd : ancestors)
           _     -> check' nd ancestors
  
-      let len = length cs
-      when (len > 0) $ do
-        i <- Rand.getStdRandom $ Rand.randomR (0, len - 1)
-        walk (snd (cs !! i)) (nd : ancestors)
+      if gEnd (ndState nd) == Just Winning
+        then return ()
+        else do
+          let cs2 = [nd2 | (_, nd2) <- cs, isNothing $ gEnd (ndState nd2)]
+              len = length cs2
+          when (len > 0) $ do
+            i <- Rand.getStdRandom $ Rand.randomR (0, len - 1)
+            walk (cs2 !! i) (nd : ancestors)
