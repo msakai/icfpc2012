@@ -30,6 +30,7 @@ run s0 = do
         when (score > bestScore) $ do
           hPutStrLn stderr $ "best score = " ++ show score
           hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
+             ++ (if gEnd s == Just Winning then " (Win)" else "")
           writeIORef bestRef (cmds, score)
   result <- try $ prog check s0
 --  result <- try $ RandomWalk.run check s0
