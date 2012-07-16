@@ -29,7 +29,10 @@ run check s0 = forever $ walk s0 []
               let cs = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
                   children = [(step s c, c:cmds) | c <- cs, isMeaningfulCommand s c]
               forM_ children $ \(s,cmds) -> check (step s A) (A:cmds)
-              let children2 = [(s, cmds) | (s, cmds) <- children, isNothing (gEnd s)]
-              unless (null children2) $ do
-                i <- Rand.getStdRandom $ Rand.randomR (0, length children2 - 1)
-                uncurry walk (children2 !! i)
+              if (or [gEnd s == Just Winning| (s, _) <- children])
+                then return ()
+                else do
+                  let children2 = [(s, cmds) | (s, cmds) <- children, isNothing (gEnd s)]
+                  unless (null children2) $ do
+                    i <- Rand.getStdRandom $ Rand.randomR (0, length children2 - 1)
+                    uncurry walk (children2 !! i)
