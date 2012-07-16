@@ -73,6 +73,7 @@ run check s0 = do
                   let nd2 = fst $ maximumBy (comparing snd) xs
                   loop nd2
     loop root
+    gc root
 
   where
     check' :: Tree -> [Tree] -> IO ()
@@ -112,3 +113,23 @@ run check s0 = do
           when (len > 0) $ do
             i <- Rand.getStdRandom $ Rand.randomR (0, len - 1)
             walk (cs2 !! i) (nd : ancestors)
+
+gc :: Tree -> IO ()
+gc root = do
+  best <- readIORef (ndBestScore root)
+  let bnd = ceiling $ fromIntegral best * 0.9
+
+  let go :: [Tree] -> IO ()
+      go [] = return ()
+      go (nd:nds) = do
+        s <- readIORef (ndBestScore nd)
+        if (bnd > s)
+          then do
+            writeIORef (ndChildren nd) Nothing
+            go nds
+          else do
+            children <- readIORef (ndChildren nd)
+            case children of
+              Nothing -> go nds
+              Just cs -> go (map snd cs ++ nds)
+  go [root]
