@@ -4,8 +4,10 @@ module Solver where
 
 import Control.Exception
 import Control.Monad
+import Data.Char
 import Data.IORef
 import System.IO
+import System.Environment
 
 import Move
 import Sim
@@ -13,8 +15,11 @@ import qualified RandomWalk
 import qualified BFS
 import qualified DFSGreedy
 
+import Debug.Trace
+
 run :: GameState -> IO ([Command], Int)
 run s0 = do
+  prog <- selectAlgorithm
   bestRef <- newIORef ([A], 0)
   let -- Commandのリストは逆順なので注意
       check :: GameState -> [Command] -> IO ()
@@ -25,8 +30,8 @@ run s0 = do
           hPutStrLn stderr $ "best score = " ++ show score
           hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
           writeIORef bestRef (cmds, score)
-
-  result <- try $ RandomWalk.run check s0
+  result <- try $ prog check s0
+--  result <- try $ RandomWalk.run check s0
 --  result <- try $ BFS.run check s0
 --  result <- try $ DFSGreedy.run check s0
 
@@ -37,3 +42,17 @@ run s0 = do
 
   (cmds, score) <- readIORef bestRef
   return (reverse cmds, score)
+
+
+selectAlgorithm :: IO ((GameState -> [Command] -> IO ()) -> GameState -> IO ())
+selectAlgorithm = do
+  { prog <- getProgName
+  ; return $ case downcase $ take 6 prog of
+      "random" -> trace "random-walk" RandomWalk.run
+      "bfs"    -> trace "bfs" BFS.run
+      "dfs-gr" -> trace "dfs-greedy" DFSGreedy.run
+      _        -> trace prog RandomWalk.run
+  }
+
+downcase :: String -> String
+downcase = map toLower
