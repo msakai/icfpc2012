@@ -179,6 +179,13 @@ case_trampoline1_map = do
     s0  = initialStateFromString trampoline1
     s1  = stepN s0 act
 
+case_cannot_move_onto_target = do
+  gPos s1 @?= (6,4)
+  where
+    act = parseCommands "DD"
+    s0  = initialStateFromString trampoline1
+    s1  = stepN s0 act
+
 trampoline1 = unlines
   [ "############"
   , "#..*.R..*..#"
