@@ -39,12 +39,15 @@ printStateAnsi (i,j) s = do
     (gWater s) (gFlooding s) (gWaterproof s) (gUnderwater s)
   printf "Growth: %d; Razors: %d\n"
     (gGrowth s) (gRazors s)
-  putStr $ unlines $ gTrampInfo s
+  putStr $ showtrampoline $ gTrampInfo s
   case gEnd s of
     Nothing -> return ()
     Just w -> printf "End: %s\n" $ show w
   where
     water = [SetColor Background Dull Blue, SetColor Foreground Vivid Yellow]
+    showtrampoline = unlines
+                   . (\ (a,b) -> ["Trampoline : " ++ a
+                                 ,"Target     : " ++ b]) . unzip
 
 printOutOfWater, printUnderWater :: Int -> Int -> [String] -> IO ()
 printOutOfWater i w = mapM_ (layoutPrint w i)

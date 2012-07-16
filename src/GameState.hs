@@ -25,7 +25,7 @@ data GameState
  , gFlooding   :: !Int                   -- ^ 水位上昇ペース                  
  , gWaterproof :: !Int                   -- ^ ロボットが水中にいて大丈夫な時間
  , gUnderwater :: !Int                   -- ^ 現在ロボットが水面下にいる継続時間
- , gTrampInfo  :: [String]               -- ^ トランポリン情報（表示専用）
+ , gTrampInfo  :: [(Char,Char)]               -- ^ トランポリン情報（表示専用）
  , gTrampoline :: [(Char, Pos)]          -- ^ トランポリン（ターゲット位置）
  , gTarget     :: [(Char, [Pos])]        -- ^ ターゲット（トランポリン位置）
  , gGrowth     :: !Int                   -- ^ 髭の成長率
@@ -56,7 +56,7 @@ initialState m meta
   , gFlooding   = fFlooding finfo
   , gWaterproof = fWaterproof finfo
   , gUnderwater = 0
-  , gTrampInfo  = map trampStr (tTrampoline tinfo)
+  , gTrampInfo  = tTrampoline tinfo
   , gTrampoline = map (\(f,t) -> (f,fromJust $ lookup t topos)) ftassc
   , gTarget     = map gather 
                 $ groupBy (\ x y -> fst x == fst y)
