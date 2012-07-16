@@ -21,6 +21,7 @@ data Tree
   , ndChildren  :: IORef (Maybe [(Command, Tree)]) -- 展開前はNothing
   , ndBestScore :: IORef Int            -- その先に進んでこれまで見つかった最善の値
   , ndTrial     :: IORef Int            -- このノードに到達した回数
+  , ndChecked   :: IORef Bool           -- チェック済みかどうか
   }
 
 newNode :: GameState -> [Command] -> IO Tree
@@ -28,6 +29,7 @@ newNode s cmds = do
   children <- newIORef Nothing
   best     <- newIORef (gScore s)
   trial    <- newIORef 0
+  checked  <- newIORef False
   return $
     Node
     { ndState     = s
@@ -35,6 +37,7 @@ newNode s cmds = do
     , ndChildren  = children
     , ndBestScore = best
     , ndTrial     = trial
+    , ndChecked   = checked
     }
 
 expand :: Tree -> IO [(Command, Tree)]
@@ -55,9 +58,8 @@ expand n = do
 
 run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
 run check s0 = do
-  root <- newNode s0 []
-
-  forM_ (iterate (*2) 1000) $ \lim -> do
+  forM_ (repeat 2000) $ \lim -> do
+    root <- newNode s0 []
     let loop nd = do
           t <- readIORef (ndTrial nd)
           if t < lim
@@ -72,15 +74,21 @@ run check s0 = do
                     return (nd2,best)
                   let nd2 = fst $ maximumBy (comparing snd) xs
                   loop nd2
+    root <- newNode s0 []
     loop root
-    gc root
 
   where
     check' :: Tree -> [Tree] -> IO ()
     check' nd ancestors = do
-      check (ndState nd) (ndCommands nd)
-      s <- readIORef (ndBestScore nd)
-      updateBest s ancestors
+      checked <- readIORef (ndChecked nd)
+      unless checked $ do
+        let s     = ndState nd
+            cmds  = ndCommands nd
+            s'    = step s A
+            cmds' = A : cmds
+        check s' cmds'
+        updateBest (gScore s') ancestors
+        writeIORef (ndChecked nd) True
 
     updateBest :: Int -> [Tree] -> IO ()
     updateBest _ [] = return ()
@@ -101,9 +109,9 @@ run check s0 = do
 
       -- 初回のみ
       when (t == 0) $ do
-        case [nd2 | (A,nd2) <- cs] of
-          nd2:_ -> check' nd2 (nd : ancestors)
-          _     -> check' nd ancestors
+        check' nd ancestors
+        forM_ cs $ \(_, ch) -> do
+          check' ch (nd : ancestors)
  
       if gEnd (ndState nd) == Just Winning
         then return ()
