@@ -150,7 +150,7 @@ parseCell '@'  = HigherOrderRock
 parseCell c 
   | c `elem` "ABCDEFGHI" = Trampoline c
   | c `elem` "123456789" = Target c
-parseCell _    = error "parseCell: parse error"
+parseCell c    = error ("parseCell: parse error: " ++ show c)
 
 showCell :: Cell -> Char
 showCell = cell2Char
