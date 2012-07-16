@@ -172,9 +172,10 @@ printSim s ms = do
     printState s'
     putStrLn ""
 
-interactiveSim :: GameState -> IO ()
-interactiveSim s0 = go (s0,Seq.empty) []
+interactiveSim :: Bool -> GameState -> IO ()
+interactiveSim vi s0 = go (s0,Seq.empty) []
   where
+    getLine' = if vi then getLineVi else getLine
     go curr@(s,_) undoBuf = do
       printState s
       putStrLn ""
@@ -182,7 +183,7 @@ interactiveSim s0 = go (s0,Seq.empty) []
     prompt curr@(s,trace) undoBuf = do
       putStr "> "
       hFlush stdout
-      l <- liftM (filter (not . isSpace)) getLine
+      l <- liftM (filter (not . isSpace)) getLine'
       case l of
         ":q"    -> return ()
         ":quit" -> return ()
@@ -205,3 +206,31 @@ interactiveSim s0 = go (s0,Seq.empty) []
         _ -> do
           putStrLn "parse error"
           prompt curr undoBuf
+
+getLineVi :: IO String
+getLineVi = do { oldEcho      <- hGetEcho stdin
+               ; oldBuffering <- hGetBuffering stdin
+               ; hSetBuffering stdin NoBuffering
+               ; hSetEcho stdin False
+               ; s <- loop
+               ; hSetEcho stdin oldEcho
+               ; hSetBuffering stdin oldBuffering
+               ; return s
+               }
+
+loop :: IO String
+loop = do { c  <- getChar
+          ; c' <- case c of
+                   'h' -> echo 'L'
+                   'j' -> echo 'D'
+                   'k' -> echo 'U'
+                   'l' -> echo 'R'
+                   'a' -> echo 'A'
+                   's' -> echo 'S'
+                   _   -> echo c
+          ; if '\n'== c then return ""
+            else loop >>= return . (c':)
+          }
+
+echo :: Char -> IO Char
+echo c = putChar c >> hFlush stdout >> return c
