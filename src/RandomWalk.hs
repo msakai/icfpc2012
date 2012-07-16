@@ -12,6 +12,7 @@ import qualified System.Random as Rand
 import Move
 import Sim
 
+-- Commandのリストは逆順なので注意
 run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
 run check s0 = forever $ walk s0 []
   where

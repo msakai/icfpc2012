@@ -14,7 +14,8 @@ import qualified RandomWalk
 run :: GameState -> IO ([Command], Int)
 run s0 = do
   bestRef <- newIORef ([A], 0)
-  let check :: GameState -> [Command] -> IO ()
+  let -- Commandのリストは逆順なので注意
+      check :: GameState -> [Command] -> IO ()
       check s cmds = do
         (_, bestScore) <- readIORef bestRef
         let score = gScore s
