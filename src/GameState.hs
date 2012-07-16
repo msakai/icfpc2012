@@ -158,3 +158,6 @@ falling m p
    west  = getCell m wp
    southeast = getCell m sep
    southwest = getCell m swp
+
+gRemainingSteps :: GameState  -> Int
+gRemainingSteps s = rangeSize (bounds (gMap s)) - gSteps s

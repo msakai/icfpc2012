@@ -5,18 +5,18 @@ module RandomWalk
 
 import Prelude hiding (catch)
 import Control.Monad
-import Data.Array
 import Data.Maybe
 import qualified System.Random as Rand
 
 import Move
+import GameState
 import Sim
 
 -- Commandのリストは逆順なので注意
 run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
 run check s0 = forever $ walk s0 []
   where
-    stepLim = rangeSize $ bounds $ gMap s0
+    stepLim = gRemainingSteps s0
 
     walk :: GameState -> [Command] -> IO ()
     walk s cmds = do
