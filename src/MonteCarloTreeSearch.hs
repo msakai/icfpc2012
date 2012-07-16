@@ -101,7 +101,6 @@ run check s0 = do
           cs <- expand nd
           if null cs
             then do
-              hPutStrLn stderr "montecalo: restart"
               go root root
             else do
               xs <- forM cs $ \(_, nd2) -> do
