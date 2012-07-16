@@ -6,6 +6,7 @@ module DFSGreedy
 import Data.Array
 import Data.List
 import Data.Ord (comparing)
+import qualified Data.Sequence as Seq
 
 import Map
 import Move
@@ -17,16 +18,16 @@ run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
 run check s0 = mapM_ (uncurry check) $ greedy $ [searchTree (gRemainingSteps s0 + 1) s0]
 
 greedy :: [Tree] -> [(GameState, [Command])]
-greedy ts = go [(t, pickTarget s) | t@(Node (s,_) _) <- ts]
+greedy ts = go [(t, pickTarget s, Seq.singleton (gPos s)) | t@(Node (s,_) _) <- ts]
 
-go :: [(Tree, Pos)] -> [(GameState, [Command])]
+go :: [(Tree, Pos, Seq.Seq Pos)] -> [(GameState, [Command])]
 go [] = []
-go ((Node (s,cmds) children, p) : ts) = (s,A:cmds) : go (ts' ++ ts)
+go ((Node (s,cmds) children, p, hist) : ts) = (s,A:cmds) : go (ts' ++ ts)
   where
     p' | gPos s == p = pickTarget s
        | otherwise   = p
-    ts' = sortBy (comparing g) [(ch, p') | (_, ch) <- children]
-    g (Node (s',_) _, _) = manhattan (gPos s') p'
+    ts' = sortBy (comparing g) [(ch, p', gPos s' Seq.<| Seq.take 10 hist) | (_, ch@(Node (s',_) _)) <- children]
+    g (Node (s',_) _, _, _) = (not (Seq.null (Seq.filter (gPos s' ==) hist)), manhattan (gPos s') p')
 
 pickTarget :: GameState -> Pos
 pickTarget s
