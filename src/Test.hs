@@ -171,6 +171,27 @@ flood5 = unlines
   , "Waterproof 5"
   ]
 
+case_trampoline1_map = do
+  gEnd s1   @?= Just Winning
+  gScore s1 @?= 419
+  where
+    act = parseCommands "RRLDDRRRUULLLLLDLLLLURRRURRRDDD"
+    s0  = initialStateFromString trampoline1
+    s1  = stepN s0 act
+
+trampoline1 = unlines
+  [ "############"
+  , "#..*.R..*..#"
+  , "#..A....B..######"
+  , "#....2.. ..#\\\\\\C#"
+  , "#......* *.#\\\\\\1#"
+  , "########L########"
+  , ""
+  , "Trampoline A targets 1"
+  , "Trampoline B targets 1"
+  , "Trampoline C targets 2"
+  ]
+
 case_example = do
   gEnd s   @?= Just Winning
   where
