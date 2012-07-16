@@ -26,7 +26,7 @@ Flag Static
 Library
   Build-Depends:      base >=4 && <5, array, containers, random
   Hs-Source-Dirs:     src
-  Exposed-Modules:    GameState, Map, Metadata, Move, RandomWalk, Sim, Solver
+  Exposed-Modules:    GameState, Map, Metadata, Move, RandomWalk, SearchTree, Sim, Solver
 
 Executable sim
   Main-is:            SimMain.hs
