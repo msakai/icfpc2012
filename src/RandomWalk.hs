@@ -23,15 +23,12 @@ run check s0 = forever $ walk s0 []
       if gSteps s > stepLim
         then return ()
         else do
-          check (step s A) (A : cmds)
           if isJust (gEnd s)
             then return ()
             else do
-              c <- randomCommand
-              walk (step s c) (c : cmds)
-
-randomCommand :: IO Command
-randomCommand = do
-  let cmds = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
-  i <- Rand.getStdRandom $ Rand.randomR (0, length cmds - 1)
-  return $ cmds !! i
+              let cs = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
+                  children = [(step s c, c:cmds) | c <- cs, isMeaningfulCommand s c]
+              forM_ children $ \(s,cmds) -> check s (A:cmds)
+              unless (null children) $ do
+                i <- Rand.getStdRandom $ Rand.randomR (0, length children - 1)
+                uncurry walk (children !! i)
