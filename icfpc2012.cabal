@@ -12,6 +12,7 @@ Extra-Source-Files:
   README
   PACKAGES
   install
+  Makefile
   samples/*.map
 
 Source-Repository head
