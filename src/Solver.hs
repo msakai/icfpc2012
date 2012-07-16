@@ -11,6 +11,7 @@ import Move
 import Sim
 import qualified RandomWalk
 import qualified BFS
+import qualified DFSGreedy
 
 run :: GameState -> IO ([Command], Int)
 run s0 = do
@@ -27,6 +28,7 @@ run s0 = do
 
   result <- try $ RandomWalk.run check s0
 --  result <- try $ BFS.run check s0
+--  result <- try $ DFSGreedy.run check s0
 
   -- XXX
   case result of

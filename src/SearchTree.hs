@@ -13,4 +13,9 @@ searchTree depthLim s0 = f 0 s0 []
   where
     f !d s cmds = Node (s,cmds) children
       where
-        children = [(c, f (d+1) (step s c) (c:cmds)) | depthLim > d, isNothing (gEnd s), c <- [minBound..maxBound]]
+        children = [ (c, f (d+1) s' (c:cmds))
+                   | depthLim > d, isNothing (gEnd s)
+                   , c <- [minBound..maxBound]
+                   , let s' = step s c
+                   , isMeaningfulCommand s c
+                   ]

@@ -12,6 +12,7 @@ module Sim
   , simulate
 
   -- * utilities
+  , isMeaningfulCommand
   ) where
 
 import Control.Monad
@@ -158,3 +159,16 @@ simulate s [] = [s]
 simulate s (m:ms)
   | isJust (gEnd s) = [s]
   | otherwise = s : simulate (step s m) ms
+
+isMeaningfulCommand :: GameState -> Command -> Bool
+isMeaningfulCommand s c =
+  case c of
+    L -> isValidMove (gMap s) p (x-1,y)
+    R -> isValidMove (gMap s) p (x+1,y)
+    U -> isValidMove (gMap s) p (x,y+1)
+    D -> isValidMove (gMap s) p (x,y-1)
+    W -> gMap (step s c) /= gMap s
+    A -> True
+    S -> gRazors s > 0 && or [getCell (gMap s) (x+dx, y+dy) == Beard | dx<-[-1..1], dy<-[-1..1]]
+  where
+    p@(x,y) = gPos s
