@@ -12,18 +12,26 @@ import Move
 import Sim
 import Print
 
+data Options
+  = Options
+  { optVi   :: Bool
+  , optAnsi :: Bool
+  }
+
 printSim :: GameState -> [Command] -> IO ()
 printSim s ms = do
   forM_ (simulate s ms) $ \s' -> do
     printState s'
     putStrLn ""
 
-interactiveSim :: Bool -> GameState -> IO ()
-interactiveSim vi s0 = go (s0,Seq.empty) []
+interactiveSim :: Options -> GameState -> IO ()
+interactiveSim opt s0 = go (s0,Seq.empty) []
   where
-    getLine' = if vi then getLineVi else getLine
+    getLine' = if optVi opt then getLineVi else getLine
     go curr@(s,_) undoBuf = do
-      printStateAnsi (2,2) s
+      if optAnsi opt
+        then printStateAnsi (2,2) s
+        else printState s
       putStrLn ""
       prompt curr undoBuf
     prompt curr@(s,trace) undoBuf = do

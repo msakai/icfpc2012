@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad
+import System.Console.GetOpt
 import System.Environment
 import System.Exit
 import System.IO
@@ -8,20 +9,38 @@ import System.IO
 import Sim
 import Interactive
 
+options :: [OptDescr (Options -> Options)]
+options =
+  [ Option [] ["vi"]   (NoArg (\opt -> opt{ optVi   = True }))  "use vi key-binding"
+  , Option [] ["dumb"] (NoArg (\opt -> opt{ optAnsi = False })) "for dumb terminal"
+  ]
+
+defaultOptions :: Options
+defaultOptions =
+  Options
+  { optVi   = False
+  , optAnsi = True
+  }
+
+header :: String
+header = "Usage: sim [--vi] file.map"
+
 main :: IO ()
 main = do
   args <- getArgs
-  case args of
-    ["--vi",fname] -> do
-      s <- liftM initialStateFromString $ readFile fname
-      putStrLn "Commands: :quit, :undo, :reset, :dump"
-      putStrLn ""
-      interactiveSim True s
-    [fname] -> do
-      s <- liftM initialStateFromString $ readFile fname
-      putStrLn "Commands: :quit, :undo, :reset, :dump"
-      putStrLn ""
-      interactiveSim False s
+
+  case getOpt Permute options args of
+    (o,args2,[]) -> do
+      let opt = foldl (flip id) defaultOptions o
+      case args2 of
+        [fname] -> do
+          s <- liftM initialStateFromString $ readFile fname
+          putStrLn "Commands: :quit, :undo, :reset, :dump"
+          putStrLn ""
+          interactiveSim opt s
+        _ -> do
+          hPutStrLn stderr (usageInfo header options)
+          exitFailure
     _ -> do
-      hPutStrLn stderr "Usage: sim [--vi] file.map"
+      hPutStrLn stderr (usageInfo header options)
       exitFailure
