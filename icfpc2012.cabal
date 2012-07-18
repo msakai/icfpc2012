@@ -39,11 +39,10 @@ Executable lifter
   HS-Source-Dirs:     src
   Build-Depends:      base >=4 && <5, array, containers, random
   Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
+  GHC-Options:        -rtsopts
   GHC-Prof-Options:   -auto-all
   if flag(Static) && impl(ghc)
-    GHC-Options: -static -optl-static -optl-pthread -rtsopts
-  else
-    GHC-Options: -rtsopts
+    GHC-Options: -static -optl-static -optl-pthread
 
 Test-suite Test
   Type:              exitcode-stdio-1.0
