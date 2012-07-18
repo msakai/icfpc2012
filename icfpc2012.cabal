@@ -44,50 +44,6 @@ Executable lifter
     GHC-Options: -static -optl-static -optl-pthread -rtsopts
   else
     GHC-Options: -rtsopts
-    
-Executable random-walk
-  Main-is:            LifterMain.hs
-  HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
-  GHC-Prof-Options:   -auto-all
-  if flag(Static) && impl(ghc)
-    GHC-Options: -static -optl-static -optl-pthread -rtsopts
-  else
-    GHC-Options: -rtsopts
-
-Executable bfs
-  Main-is:            LifterMain.hs
-  HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
-  GHC-Prof-Options:   -auto-all
-  if flag(Static) && impl(ghc)
-    GHC-Options: -static -optl-static -optl-pthread -rtsopts
-  else
-    GHC-Options: -rtsopts
-
-Executable dfs-greedy
-  Main-is:            LifterMain.hs
-  HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
-  GHC-Prof-Options:   -auto-all
-  if flag(Static) && impl(ghc)
-    GHC-Options: -static -optl-static -optl-pthread -rtsopts
-  else
-    GHC-Options: -rtsopts
-
-Executable montecarlo
-  Main-is:            LifterMain.hs
-  HS-Source-Dirs:     src
-  Build-Depends:      base >=4 && <5, array, containers, random
-  Other-Modules:      GameState, Map, Metadata, Move, Sim, Solver, RandomWalk, SearchTree, BFS, DFSGreedy, MonteCarloTreeSearch
-  GHC-Prof-Options:   -auto-all
-  if flag(Static) && impl(ghc)
-    GHC-Options: -static -optl-static -optl-pthread -rtsopts
-  else
-    GHC-Options: -rtsopts
 
 Test-suite Test
   Type:              exitcode-stdio-1.0
