@@ -13,13 +13,13 @@ import GameState
 import Sim
 
 -- Commandのリストは逆順なので注意
-run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
-run check s0 = forever $ walk s0 []
+run :: (GameState -> IO ()) -> GameState -> IO ()
+run check s0 = forever $ walk s0
   where
     stepLim = gRemainingSteps s0
 
-    walk :: GameState -> [Command] -> IO ()
-    walk s cmds = do
+    walk :: GameState -> IO ()
+    walk s = do
       if gSteps s > stepLim
         then return ()
         else do
@@ -27,12 +27,12 @@ run check s0 = forever $ walk s0 []
             then return ()
             else do
               let cs = [L,R,U,D,W,S] -- Aは無条件にチェックするのでここで候補にはしない
-                  children = [(step s c, c:cmds) | c <- cs, isMeaningfulCommand s c]
-              forM_ children $ \(s,cmds) -> check (step s A) (A:cmds)
-              if (or [gEnd s == Just Winning| (s, _) <- children])
+                  children = [step s c | c <- cs, isMeaningfulCommand s c]
+              forM_ children check
+              if (or [gEnd s' == Just Winning| s' <- children])
                 then return ()
                 else do
-                  let children2 = [(s, cmds) | (s, cmds) <- children, isNothing (gEnd s)]
+                  let children2 = [s' | s' <- children, isNothing (gEnd s')]
                   unless (null children2) $ do
                     i <- Rand.getStdRandom $ Rand.randomR (0, length children2 - 1)
-                    uncurry walk (children2 !! i)
+                    walk (children2 !! i)

@@ -17,15 +17,17 @@ import Sim
 data Tree
   = Node
   { ndState     :: GameState
-  , ndCommands  :: [Command]
   , ndChildren  :: IORef (Maybe [(Command, Tree)]) -- 展開前はNothing
   , ndBestScore :: IORef Int            -- その先に進んでこれまで見つかった最善の値
   , ndTrial     :: IORef Int            -- このノードに到達した回数
   , ndChecked   :: IORef Bool           -- チェック済みかどうか
   }
 
-newNode :: GameState -> [Command] -> IO Tree
-newNode s cmds = do
+ndCommands :: Tree -> [Command]
+ndCommands = gHistory . ndState
+
+newNode :: GameState -> IO Tree
+newNode s = do
   children <- newIORef Nothing
   best     <- newIORef (gScore s)
   trial    <- newIORef 0
@@ -33,7 +35,6 @@ newNode s cmds = do
   return $
     Node
     { ndState     = s
-    , ndCommands  = cmds
     , ndChildren  = children
     , ndBestScore = best
     , ndTrial     = trial
@@ -47,7 +48,7 @@ expand n = do
     Just xs -> return xs
     Nothing -> do
       children <- sequence
-        [ do n' <- newNode (step (ndState n) c) (c : ndCommands n)
+        [ do n' <- newNode (step (ndState n) c)
              return (c, n')
         | isNothing (gEnd (ndState n))
         , c <- [minBound..maxBound]
@@ -56,10 +57,9 @@ expand n = do
       writeIORef (ndChildren n) (Just children)
       return children  
 
-run :: (GameState -> [Command] -> IO ()) -> GameState -> IO ()
+run :: (GameState -> IO ()) -> GameState -> IO ()
 run check s0 = do
   forM_ (repeat 2000) $ \lim -> do
-    root <- newNode s0 []
     let loop nd = do
           t <- readIORef (ndTrial nd)
           if t < lim
@@ -74,7 +74,7 @@ run check s0 = do
                     return (nd2,best)
                   let nd2 = fst $ maximumBy (comparing snd) xs
                   loop nd2
-    root <- newNode s0 []
+    root <- newNode s0
     loop root
 
   where
@@ -82,11 +82,9 @@ run check s0 = do
     check' nd ancestors = do
       checked <- readIORef (ndChecked nd)
       unless checked $ do
-        let s     = ndState nd
-            cmds  = ndCommands nd
-            s'    = step s A
-            cmds' = A : cmds
-        check s' cmds'
+        let s  = ndState nd
+            s' = step s A
+        check s'
         updateBest (gScore s') ancestors
         writeIORef (ndChecked nd) True
 

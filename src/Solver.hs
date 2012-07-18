@@ -6,6 +6,7 @@ import Control.Exception
 import Control.Monad
 import Data.Char
 import Data.List
+import Data.Maybe
 import Data.IORef
 import System.IO
 
@@ -16,7 +17,7 @@ import qualified BFS
 import qualified DFSGreedy
 import qualified MonteCarloTreeSearch
 
-type Algorithm = (GameState -> [Command] -> IO ()) -> GameState -> IO ()
+type Algorithm = (GameState -> IO ()) -> GameState -> IO ()
 
 algorithms :: [(String, Algorithm)]
 algorithms =
@@ -29,17 +30,19 @@ algorithms =
 run :: GameState -> String -> IO ([Command], Int)
 run s0 algorithm = do
   let (name, prog) = selectAlgorithm algorithm
-  bestRef <- newIORef ([A], 0)
-  let -- Commandのリストは逆順なので注意
-      check :: GameState -> [Command] -> IO ()
-      check s cmds = do
-        (_, bestScore) <- readIORef bestRef
-        let score = gScore s
-        when (score > bestScore) $ do
+  bestRef <- newIORef s0
+  let check :: GameState -> IO ()
+      check s = do
+        let s'    = if isJust (gEnd s) then s else step s A
+            score = gScore s'
+            cmds  = reverse $ gHistory s'
+
+        best <- readIORef bestRef
+        when (score > gScore best) $ do
           hPutStrLn stderr $ "best score = " ++ show score
-          hPutStrLn stderr $ "commands = " ++ showCommands (reverse cmds)
-             ++ (if gEnd s == Just Winning then " (Win)" else "")
-          writeIORef bestRef (cmds, score)
+          hPutStrLn stderr $ "commands = " ++ showCommands cmds
+             ++ (if gEnd s' == Just Winning then " (Win)" else "")
+          writeIORef bestRef s'
 
   hPutStrLn stderr $ "algorithm: " ++ name
   result <- try $ prog check s0
@@ -49,8 +52,8 @@ run s0 algorithm = do
     Right () -> return ()
     Left (_ :: AsyncException) -> return ()
 
-  (cmds, score) <- readIORef bestRef
-  return (reverse cmds, score)
+  s <- readIORef bestRef
+  return (reverse (gHistory s), gScore s)
 
 selectAlgorithm :: String -> (String, Algorithm)
 selectAlgorithm prog =

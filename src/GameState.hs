@@ -6,7 +6,7 @@ import Data.List
 
 import Map
 import Metadata
-import Move (EndingCondition)
+import Move (Command, EndingCondition)
 
 data GameState
  = GameState
@@ -31,6 +31,7 @@ data GameState
  , gGrowth     :: !Int                   -- ^ 髭の成長率
  , gBreard     :: [Pos]                  -- ^ 髭の位置
  , gRazors     :: !Int                   -- ^ ロボットが持つ剃刀の数
+ , gHistory    :: [Command]              -- ^ コマンド履歴
  }
  deriving (Eq, Show)
 
@@ -64,6 +65,7 @@ initialState m meta
   , gGrowth     = grGrowth ginfo
   , gBreard     = [ i | (i,Beard) <- assocs m ]
   , gRazors     = grRazors ginfo
+  , gHistory    = []
   }
   where
     (_,(w,h)) = bounds m

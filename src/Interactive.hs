@@ -25,16 +25,16 @@ printSim s ms = do
     putStrLn ""
 
 interactiveSim :: Options -> GameState -> IO ()
-interactiveSim opt s0 = go (s0,Seq.empty) []
+interactiveSim opt s0 = go s0 []
   where
     getLine' = if optVi opt then getLineVi else getLine
-    go curr@(s,_) undoBuf = do
+    go s undoBuf = do
       if optAnsi opt
         then printStateAnsi (2,2) s
         else printState s
       putStrLn ""
-      prompt curr undoBuf
-    prompt curr@(s,trace) undoBuf = do
+      prompt s undoBuf
+    prompt s undoBuf = do
       putStr "> "
       hFlush stdout
       l <- liftM (filter (not . isSpace)) getLine'
@@ -42,24 +42,24 @@ interactiveSim opt s0 = go (s0,Seq.empty) []
         ":q"    -> return ()
         ":quit" -> return ()
         ":dump" -> do
-          putStrLn $ showCommands (F.toList trace)
-          prompt (s,trace) undoBuf
+          putStrLn $ showCommands $ reverse $ gHistory s
+          prompt s undoBuf
         ":undo" -> do
           case undoBuf of
             [] -> do
               putStrLn "empty undo buffer"
-              go (s,trace) undoBuf
+              go s undoBuf
             (old:undoBuf') -> go old undoBuf'
         ":reset" -> do
           case undoBuf of
-            [] -> go (s,trace) undoBuf
+            [] -> go s undoBuf
             _ -> go (last undoBuf) []
         _ | isNothing (gEnd s) && all (`elem` "LRUDWAS") (map toUpper l) -> do
           let cs = parseCommands (map toUpper l)
-          go (stepN s cs, trace <> Seq.fromList cs) (curr : undoBuf)
+          go (stepN s cs) (s : undoBuf)
         _ -> do
           putStrLn "parse error"
-          prompt curr undoBuf
+          prompt s undoBuf
 
 getLineVi :: IO String
 getLineVi = do { oldEcho      <- hGetEcho stdin

@@ -29,7 +29,7 @@ import GameState
 --------------------------------------------------------------------}
 
 move :: Command -> GameState -> GameState
-move cmd s@GameState{ gMap = m, gPos = (x,y) } =
+move cmd s@GameState{ gMap = m, gPos = (x,y), gHistory = hist } =
   case cmd of
     L -> f (x-1, y)
     R -> f (x+1, y)
@@ -38,9 +38,9 @@ move cmd s@GameState{ gMap = m, gPos = (x,y) } =
     W -> s1
     S | gRazors s1 > 0 -> s1{ gMap = applyRazor (x,y) m, gRazors = gRazors s1 - 1 }
       | otherwise      -> s1
-    A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25 }
+    A -> s{ gSteps = gSteps s + 1, gEnd = Just Abort, gScore = gScore s + gLambda s * 25, gHistory = cmd : hist }
   where
-    s1 = s{ gSteps = gSteps s + 1, gScore = gScore s - 1 }
+    s1 = s{ gSteps = gSteps s + 1, gScore = gScore s - 1, gHistory = cmd : hist }
     f xy@(x',y') = 
       case m ! (x',y') of
         Empty          -> s'
